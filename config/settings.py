@@ -32,7 +32,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
 
-
 ]
 
 MIDDLEWARE = [
@@ -46,11 +45,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'config.urls'
-
-
-
-
-
 
 TEMPLATES = [
     {
@@ -121,8 +115,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
 
 
 SIMPLE_JWT = {
