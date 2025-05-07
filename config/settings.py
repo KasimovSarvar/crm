@@ -1,4 +1,3 @@
-from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -27,11 +26,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'authe',
-    'lead',
-    'drf_yasg',
-    'rest_framework',
-    'rest_framework_simplejwt',
-
 ]
 
 MIDDLEWARE = [
@@ -115,35 +109,3 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=14),
-}
-
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ]
-}
-
-
-SWAGGER_SETTINGS = {
-    'SECURITY_DEFINITIONS': {
-        'jwt': {
-            'type': 'apiKey',
-            'name': 'Authorization',
-            'in': 'header'
-        }
-    },
-    'SWAGGER_UI_REQUEST_HEADERS': [
-        {
-            'name': 'Authorization',
-            'description': 'JWT Token',
-            'value': 'Bearer <your_jwt_token_here>'
-        },
-    ],
-    'LOGIN_URL': 'api/v1/auth/login',
-    "DEFAULT_MODEL_RENDERING": "example"
-}
