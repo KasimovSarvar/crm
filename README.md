@@ -31,9 +31,9 @@ python manage.py migrate
 python manage.py runserver
 ```
 Agar Docker ishlatilgan bo‘lsa:
-
+```
 docker-compose up --build
-
+```
 
 📖 Foydalanish
 Brauzer orqali: http://127.0.0.1:8000/
@@ -54,4 +54,5 @@ Push qiling: git push origin my-feature
 Pull request yuboring.
 
 📄 Litsenziya
+
 Ushbu loyiha MIT litsenziyasi asosida tarqatiladi.
