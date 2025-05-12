@@ -24,8 +24,8 @@ REST API orqali tashqi tizimlar bilan integratsiya
 
 📦 O‘rnatish
 ```bash
-git clone https://github.com/sizningusername/institut-crm.git
-cd institut-crm
+git clone https://github.com/KasimovSarvar/crm.git
+cd crm
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver
