@@ -131,7 +131,8 @@ SIMPLE_JWT = {
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
+        "authe.middle.CustomJWTAuthentication"
     ]
 }
 
@@ -154,5 +155,3 @@ SWAGGER_SETTINGS = {
     'LOGIN_URL': 'api/v1/auth/login',
     "DEFAULT_MODEL_RENDERING": "example"
 }
-
-AUTH_USER_MODEL = 'authe.User'

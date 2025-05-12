@@ -1,7 +1,6 @@
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from exceptions.exception import CustomApiException
-from exceptions.error_messages import ErrorCodes
 from .models import User
+from rest_framework.exceptions import AuthenticationFailed
 
 
 class CustomJWTAuthentication(JWTAuthentication):
@@ -13,7 +12,7 @@ class CustomJWTAuthentication(JWTAuthentication):
         user_id = validated_token.get('user_id')
         user = User.objects.filter(id=user_id).first()
         if not user:
-            raise CustomApiException(ErrorCodes.UNAUTHORIZED)
+            raise AuthenticationFailed("User not found")
         return user
 
 

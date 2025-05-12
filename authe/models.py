@@ -15,7 +15,7 @@ USER_STATUS = (
 )
 
 
-class User(BaseModel,AbstractUser):
+class User(BaseModel):
     username = models.CharField(max_length=100, verbose_name='Имя пользователя', unique=True)
     password = models.CharField(max_length=255, verbose_name='Пароль')
     full_name = models.CharField(max_length=100, verbose_name="Полное имя")

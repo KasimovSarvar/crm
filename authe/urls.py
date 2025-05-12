@@ -2,6 +2,9 @@ from django.contrib.auth.views import LoginView
 from django.urls import path
 from  authe.views import home_view,register_view,login_view,control_user_view,control_lead_view,control_student_view,control_outcome_view,control_payment_view
 from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView
+from config.urls import schema_view
+
+
 urlpatterns = [
     path('', home_view),
     path('register/', register_view),
@@ -12,6 +15,8 @@ urlpatterns = [
     path('control/outcome/', control_outcome_view),
     path('control/payment/', control_payment_view),
 
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
 
 ]
