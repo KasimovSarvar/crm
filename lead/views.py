@@ -54,8 +54,8 @@ def update_payment(request, pk):
 def balance_report(request):
     if not is_accountant(request.user):
         return Response({'error': 'Ruxsat yo‘q'}, status=status.HTTP_401_UNAUTHORIZED)
-    total_income = Payment.objects.filter(is_payed='payed').aggregate(Sum('amount'))['amount__sum'] or 0
-    total_expense = Outcome.objects.aggregate(Sum('amount'))['amount__sum'] or 0
+    total_income = Payment.objects.filter(is_payed='payed').aggregate(Sum('amount'))['amount__sum']
+    total_expense = Outcome.objects.aggregate(Sum('amount'))['amount__sum']
     balance = total_income - total_expense
 
     return Response({
