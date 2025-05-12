@@ -124,17 +124,21 @@ def outcome_view(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def lead_list_view(request):
+    lead = Lead.objects.all()
+    serializer = LeadSerializer(lead, many=True)
+    return Response({'message':'success'},serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def my_lead_list_view(request):
     user = request.user
-    if user.role in ['Admin', 'SuperUser']:
+    if user.is_authenticate and user.role == 4:
         lead = Lead.objects.filter(admin=user)
         serializer = LeadSerializer(lead, many=True)
         return Response({'message':'success'},serializer.data)
-    return HttpResponse({'message':'You are not Admin or Superuser'}, status=status.HTTP_403_FORBIDDEN)
+    return HttpResponse({'message':'You are not Admin'}, status=status.HTTP_403_FORBIDDEN)
 
 @api_view(['PUT'])
-@permission_classes([IsAuthenticated])
 def lead_update_view(request, lead_id):
     user = request.user
     try:
@@ -151,15 +155,59 @@ def lead_update_view(request, lead_id):
     
     return Response({'detail': 'You are not authorized to update this lead'}, status=status.HTTP_403_FORBIDDEN)
 
-@api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
-def lead_delete_view(request, pk):
+ 
+
+@api_view(['POST'])
+def create_student_view(request, lead_id):
+    data = request.data
+    user = request.user
+    
+    lead = Lead.objects.get(id=data['lead'])
+    
+    if not user.is_authenticated and user.role == 4:
+        return HttpResponse({'message':'You are not Admin'}, status=status.HTTP_403_FORBIDDEN)
+    
+    try:
+        lead = Lead.objects.get(id=lead_id)
+    except Lead.DoesNotExist:
+        return Response({'detail': 'Lead not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    if not lead.admin == user:
+        return HttpResponse({'message':'You are not Admin'}, status=status.HTTP_403_FORBIDDEN)
+    
+    serializer = StudentSerializer(data=data)
+    if serializer.is_valid():
+        serializer.save()
+        return HttpResponse(serializer.data, status=status.HTTP_201_CREATED)
+    return Response({'message':'error in creating student'}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def my_students_list_view(request):
+    user = request.user
+    if user.is_authenticate and user.role == 4:
+        student = Student.objects.filter(admin=user)
+        serializer = StudentSerializer(student, many=True)
+        return Response({'message':'success'},serializer.data)
+    return HttpResponse({'message':'You are not Admin'}, status=status.HTTP_403_FORBIDDEN)
+
+@api_view(['PATCH'])
+def student_update_view(request, pk):
+    data = request.data
     user = request.user
     try:
-        lead = Lead.objects.get(pk=pk, admin=user)  
-    except Lead.DoesNotExist:
-        return Response({'detail': 'Lead not found or you are not authorized to delete this lead'}, status=status.HTTP_404_NOT_FOUND)
+        student = Student.objects.get(id=pk)
+    except Student.DoesNotExist:
+        return Response({'detail': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
     
-    lead.delete()   
-    return Response({'detail': 'Lead deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
-
+    if not user.is_authenticated and user.role == 4:
+        return HttpResponse({'message':'You are not Admin'}, status=status.HTTP_403_FORBIDDEN)
+    
+    if not student.admin == user:
+        return HttpResponse({'message':'You are not Admin'}, status=status.HTTP_403_FORBIDDEN)
+    
+    serializer = StudentSerializer(student, data=data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({'message':'success! update this student'},serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
