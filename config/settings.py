@@ -1,6 +1,8 @@
 from datetime import timedelta
 from pathlib import Path
 
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -14,7 +16,7 @@ SECRET_KEY = 'django-insecure-#lgd+tdbnjcz00th--^bg@-n56o$y+3esspag5uki@g@up!hpb
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -42,6 +44,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # "authe.middle.CustomUserMiddleware"
+
+
+
+
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -147,3 +154,5 @@ SWAGGER_SETTINGS = {
     'LOGIN_URL': 'api/v1/auth/login',
     "DEFAULT_MODEL_RENDERING": "example"
 }
+
+AUTH_USER_MODEL = 'authe.User'
