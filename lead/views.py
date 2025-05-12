@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view
 from .serializers import OutcomeSerializer
 from .models import Outcome
 
+
 @api_view(['GET', 'POST'])
 def outcome_view(request):
     if request.user.role != 3:
