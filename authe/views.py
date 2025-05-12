@@ -31,6 +31,7 @@ def register_view(request):
 
 
 
+
     user_obj = serial.save()
     user_obj.set_password(user_obj.password)
     user_obj.save()
