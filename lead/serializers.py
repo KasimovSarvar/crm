@@ -4,6 +4,7 @@ from .models import Outcome, CategoryOutlay, Payment, Student, SeasonFacultyLimi
     Comment, Lead
 
 
+
 class OutcomeSerializer(ModelSerializer):
     class Meta:
         model = Outcome
