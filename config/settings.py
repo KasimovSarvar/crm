@@ -20,6 +20,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "jazzmin",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -146,4 +147,12 @@ SWAGGER_SETTINGS = {
     ],
     'LOGIN_URL': 'api/v1/auth/login',
     "DEFAULT_MODEL_RENDERING": "example"
+}
+
+JAZZMIN_SETTINGS = {
+    "site_title": "CRM Admin",
+    "site_header": "CRM Dashboard",
+    "site_brand": "MyCRM",
+    "welcome_sign": "Welcome to the CRM admin panel",
+    "copyright": "MyCRM",
 }
