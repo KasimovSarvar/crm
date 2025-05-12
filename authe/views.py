@@ -22,7 +22,7 @@ def home_view(request):
 @swagger_auto_schema(methods=['POST'],responses={200:UserSerializer(many=True)})
 @api_view(http_method_names=['POST'])
 def register_view(request):
-    if request.user.role != 1: #4
+    if request.user.role != 1:
         return Response(data={"Error":"Only super user can create new user"},status=status.HTTP_400_BAD_REQUEST)
 
     serial= UserSerializer(data=request.data)
