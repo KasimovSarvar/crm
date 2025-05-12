@@ -15,8 +15,8 @@ JWT Authentication
 ⚙️ O‘rnatish va ishga tushirish:
 1. Repository-ni klonlash:
 ```
-git clone https://github.com/username/institut_crm.git
-cd institut_crm
+git clone https://github.com/KasimovSarvar/crm.git
+cd crm
 ```
 2. Virtual environment yaratish:
  ```
