@@ -1,12 +1,14 @@
-from django.contrib.auth.views import LoginView
 from django.urls import path
-from  authe.views import home_view,register_view,login_view,control_user_view,control_lead_view,control_student_view
-from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView
+from  authe.views import register_view,login_view,control_user_view,control_lead_view,control_student_view
+from config.urls import schema_view
+
 urlpatterns = [
-    path('', home_view),
     path('register/', register_view),
     path('login/', login_view),
     path('control/user/', control_user_view),
     path('control/lead/', control_lead_view),
     path('control/student/', control_student_view),
 ]
+
+path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
