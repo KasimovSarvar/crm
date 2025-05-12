@@ -2,17 +2,10 @@ from django.shortcuts import render, get_object_or_404, HttpResponse
 from .models import Lead, Comment, State, University, Season, Faculty, Student
 from .serializer import LeadSerializer, StudentSerializer, UserSerializer
 from rest_framework.decorators import api_view
-from rest_framework.response import Response  
 from rest_framework import status
 from rest_framework.response import Response
 from .serializers import OutcomeSerializer
 from .models import Outcome
-from django.shortcuts import render, get_object_or_404, HttpResponse
-from .models import Lead, Comment, State, University, Season, Faculty, Student
-from .serializer import LeadSerializer, StudentSerializer, UserSerializer
-from rest_framework.decorators import api_view
-from rest_framework.response import Response  
-from django.contrib.auth import get_user_model
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from rest_framework import status
