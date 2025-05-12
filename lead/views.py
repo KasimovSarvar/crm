@@ -114,3 +114,13 @@ def lead_list_view(request):
     serializer = LeadSerializer(leads, many=True)
 
     return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def student_list_view(request):
+    if request.user.role not in [1, 2]:
+        return Response({'message': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
+    students = Student.objects.filter(admin=request.user)
+    serializer = StudentSerializer(students, many=True)
+    return Response({'data': serializer.data}, status=status.HTTP_200_OK)
