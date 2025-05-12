@@ -17,43 +17,43 @@ def is_accountant(user):
 @api_view(['GET'])
 def payment_list(request):
     if not is_accountant(request.user):
-        return Response({'error': 'Ruxsat yo‘q'}, status=403)
+        return Response({'error': 'Ruxsat yo‘q'}, status=status.HTTP_401_UNAUTHORIZED)
     payments = Payment.objects.all()
     serializer = PaymentSerializer(payments, many=True)
 
-    return Response(serializer.data)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
 def create_payment(request):
     if not is_accountant(request.user):
-        return Response({'error': 'Ruxsat yo‘q'}, status=403)
+        return Response({'error': 'Ruxsat yo‘q'}, status=status.HTTP_401_UNAUTHORIZED)
     serializer = PaymentSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
-        return Response(serializer.data, status=201)
-    return Response(serializer.errors, status=400)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['PUT'])
 def update_payment(request, pk):
     if not is_accountant(request.user):
-        return Response({'error': 'Ruxsat yo‘q'}, status=403)
+        return Response({'error': 'Ruxsat yo‘q'}, status=status.HTTP_401_UNAUTHORIZED)
     payment = Payment.objects.filter(id=pk).first()
     if not payment:
-        return Response({'error': 'Payment not found'}, status=404)
+        return Response({'error': 'Payment not found'}, status=status.HTTP_404_NOT_FOUND)
     serializer = PaymentSerializer(payment, data=request.data)
     if serializer.is_valid():
         serializer.save()
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    return Response(serializer.errors, status=400)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
 def balance_report(request):
     if not is_accountant(request.user):
-        return Response({'error': 'Ruxsat yo‘q'}, status=403)
+        return Response({'error': 'Ruxsat yo‘q'}, status=status.HTTP_401_UNAUTHORIZED)
     total_income = Payment.objects.filter(is_payed='payed').aggregate(Sum('amount'))['amount__sum'] or 0
     total_expense = Outcome.objects.aggregate(Sum('amount'))['amount__sum'] or 0
     balance = total_income - total_expense
@@ -62,8 +62,7 @@ def balance_report(request):
         'total_income': total_income,
         'total_expense': total_expense,
         'balance': balance
-    })
-
+    }, status=status.HTTP_200_OK)
 
 # HR
 
