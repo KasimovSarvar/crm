@@ -1,29 +1,68 @@
 from django.contrib.auth.hashers import make_password
+from django.db.models import Sum
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from authe.models import User
 from authe.serializers import UserSerializer
-from .serializers import OutcomeSerializer, LeadSerializer, StudentSerializer
-from .models import Outcome, Lead, Student
+from .serializers import OutcomeSerializer, LeadSerializer, StudentSerializer, PaymentSerializer
+from .models import Outcome, Lead, Student, Payment
 
 
-@api_view(['GET', 'POST'])
-def outcome_view(request):
-    if request.user.role != 3:
-        return Response({'message': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+def is_accountant(user):
+    return user.is_authenticated and user.role == 3
 
-    if request.method == 'GET':
-        outcomes = Outcome.objects.all()
-        serializer = OutcomeSerializer(outcomes, many=True)
+
+@api_view(['GET'])
+def payment_list(request):
+    if not is_accountant(request.user):
+        return Response({'error': 'Ruxsat yo‘q'}, status=403)
+    payments = Payment.objects.all()
+    serializer = PaymentSerializer(payments, many=True)
+
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+def create_payment(request):
+    if not is_accountant(request.user):
+        return Response({'error': 'Ruxsat yo‘q'}, status=403)
+    serializer = PaymentSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=201)
+    return Response(serializer.errors, status=400)
+
+
+@api_view(['PUT'])
+def update_payment(request, pk):
+    if not is_accountant(request.user):
+        return Response({'error': 'Ruxsat yo‘q'}, status=403)
+    payment = Payment.objects.filter(id=pk).first()
+    if not payment:
+        return Response({'error': 'Payment not found'}, status=404)
+    serializer = PaymentSerializer(payment, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
         return Response(serializer.data)
 
-    if request.method == 'POST':
-        serializer = OutcomeSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer.errors, status=400)
+
+
+@api_view(['GET'])
+def balance_report(request):
+    if not is_accountant(request.user):
+        return Response({'error': 'Ruxsat yo‘q'}, status=403)
+    total_income = Payment.objects.filter(is_payed='payed').aggregate(Sum('amount'))['amount__sum'] or 0
+    total_expense = Outcome.objects.aggregate(Sum('amount'))['amount__sum'] or 0
+    balance = total_income - total_expense
+
+    return Response({
+        'total_income': total_income,
+        'total_expense': total_expense,
+        'balance': balance
+    })
+
 
 #
 @api_view(['POST'])
