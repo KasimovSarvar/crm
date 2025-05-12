@@ -246,6 +246,9 @@ def student_list_view(request):
     serializer = StudentSerializer(students, many=True)
     return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 
+# END HR
+
+
 
 @api_view(['GET'])
 def lead_list(request):
@@ -261,7 +264,6 @@ def lead_list(request):
     return Response(serializer.data)
 
 
-# END HR...
 
 
 @api_view(['PUT'])
@@ -283,8 +285,6 @@ def lead_update_view(request, lead_id):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     return Response({'message':'You are not Admin'}, status=status.HTTP_403_FORBIDDEN)
     
-
- 
 
 @api_view(['POST'])
 def create_student(request):
