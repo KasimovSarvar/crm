@@ -6,9 +6,9 @@ from  rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import make_password, check_password
-from lead.models import Lead, Student
+from lead.models import Lead, Student,Payment,Outcome
 from .models import User
-from lead.serialazer import LeadSerializer,StudentSerializer
+from lead.serialazer import LeadSerializer,StudentSerializer,PaymentSerializer,OutcomeSerializer
 from .serialazer import UserSerializer
 
 
@@ -86,4 +86,20 @@ def control_student_view(request):
     if request.user.role == 1:
         student_obj = Student.objects.all()
         return Response(data=StudentSerializer(student_obj,many=True).data, status=status.HTTP_200_OK)
+    return Response(data={"Error":"Only super user"}, status=status.HTTP_200_OK)
+
+@swagger_auto_schema(methods=['GET'],responses={200:PaymentSerializer(many=True)})
+@api_view(['GET'])
+def control_payment_view(request):
+    if request.user.role == 1:
+        payment_obj = Payment.objects.all()
+        return Response(data=PaymentSerializer(payment_obj,many=True).data, status=status.HTTP_200_OK)
+    return Response(data={"Error":"Only super user"}, status=status.HTTP_200_OK)
+
+@swagger_auto_schema(methods=['GET'],responses={200:OutcomeSerializer(many=True)})
+@api_view(['GET'])
+def control_outcome_view(request):
+    if request.user.role == 1:
+        outcome_obj = Outcome.objects.all()
+        return Response(data=OutcomeSerializer(outcome_obj,many=True).data, status=status.HTTP_200_OK)
     return Response(data={"Error":"Only super user"}, status=status.HTTP_200_OK)
