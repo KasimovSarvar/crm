@@ -94,7 +94,7 @@ def control_student_view(request):
 
 @swagger_auto_schema(methods=['POST'], responses={200: UserSerializer(many=True)})
 @api_view(['POST'])
-def register_view(request):
+def user_register(request):
     if not request.user.is_authenticated:
         return Response({"Error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
 
