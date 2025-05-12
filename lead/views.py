@@ -6,6 +6,8 @@ from authe.models import User
 from authe.serializers import UserSerializer
 from .serializers import OutcomeSerializer, LeadSerializer, StudentSerializer
 from .models import Outcome, Lead, Student
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 
 @api_view(['GET', 'POST'])
@@ -24,8 +26,21 @@ def outcome_view(request):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+# HR
 
-#
+
+@swagger_auto_schema(
+    method='post',
+    operation_summary="HR yoki SuperUser lead yaratishi",
+    request_body=LeadSerializer,
+    responses={
+        201: openapi.Response(description="Lead qoshildi", schema=LeadSerializer),
+        400: "Invalid credentials",
+        403: "Permission denied"
+    }
+)
+@api_view(['POST'])
 @api_view(['POST'])
 def create_lead_view(request):
     if request.user.role not in [1, 2]:
@@ -37,6 +52,18 @@ def create_lead_view(request):
     return Response({"lead": LeadSerializer(lead).data}, status=status.HTTP_201_CREATED)
 
 
+
+
+@swagger_auto_schema(
+    method='post',
+    operation_summary="HR yoki SuperUser user yaratishi",
+    request_body=UserSerializer,
+    responses={
+        201: openapi.Response(description="User qoshildi", schema=UserSerializer),
+        400: "Invalid credentials",
+        403: "Permission denied"
+    }
+)
 @api_view(['POST'])
 def create_user_view(request):
     if request.user.role not in [1, 2]:
@@ -52,6 +79,17 @@ def create_user_view(request):
     return Response({"user": UserSerializer(user).data}, status=status.HTTP_201_CREATED)
 
 
+
+@swagger_auto_schema(
+    method='post',
+    operation_summary="HR yoki SuperUser student yaratishi",
+    request_body=StudentSerializer,
+    responses={
+        201: openapi.Response(description="Student qoshildi", schema=StudentSerializer),
+        400: "Invalid credentials",
+        403: "Permission denied"
+    }
+)
 @api_view(['POST'])
 def create_student_view(request):
     if request.user.role not in [1, 2]:
@@ -63,6 +101,20 @@ def create_student_view(request):
     return Response({"student": UserSerializer(student).data}, status=status.HTTP_201_CREATED)
 
 
+
+@swagger_auto_schema(
+    method='put',
+    operation_summary="HR yoki SuperUser leadni adminini ozgartirishi",
+    request_body=openapi.Schema(type=openapi.TYPE_OBJECT, properties={
+        'admin_id': openapi.Schema(type=openapi.TYPE_INTEGER)
+    }),
+    responses={
+        200: "Leadi admini ozgratirildi",
+        400: "admin_id yoki notogri",
+        403: "Permission denied",
+        404: "Lead yoki admin topilmadi"
+    }
+)
 @api_view(['PUT'])
 def change_lead_admin_view(request, lead_id):
     if request.user.role not in [1, 2]:
@@ -77,13 +129,28 @@ def change_lead_admin_view(request, lead_id):
 
     new_admin = User.objects.filter(id=new_admin_id, role=4).first()
     if not new_admin:
-        return Response({'message': 'Bunday admin mavjud emas'}, status=404)
+        return Response({'message': 'Bunday admin mavjud emas'}, status=status.HTTP_404_NOT_FOUND)
 
     lead.admin = new_admin
     lead.save()
     return Response({'message': 'Lead admin yangilandi'}, status=status.HTTP_200_OK)
 
 
+
+
+@swagger_auto_schema(
+    method='put',
+    operation_summary="HR yoki SuperAdmin student admin ozgartirishi",
+    request_body=openapi.Schema(type=openapi.TYPE_OBJECT, properties={
+        'admin_id': openapi.Schema(type=openapi.TYPE_INTEGER)
+    }),
+    responses={
+        200: "Student admin ozgraildi",
+        400: "admin_id shart yoki notogri",
+        403: "Permission denied",
+        404: "Student yoki admin topilmadi"
+    }
+)
 @api_view(['PUT'])
 def change_student_admin_view(request, student_id):
     if request.user.role not in [1, 2]:
@@ -105,6 +172,14 @@ def change_student_admin_view(request, student_id):
     return Response({'message': 'Student admin yangilandi'}, status=status.HTTP_200_OK)
 
 
+@swagger_auto_schema(
+    method='get',
+    operation_summary="HR ozi yaratgan leadlarini korishi",
+    responses={
+        200: openapi.Response(description="Leadlari", schema=LeadSerializer(many=True)),
+        403: "Permission denied"
+    }
+)
 @api_view(['GET'])
 def lead_list_view(request):
     if request.user.role not in [1, 2]:
@@ -116,6 +191,15 @@ def lead_list_view(request):
     return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 
 
+
+@swagger_auto_schema(
+    method='get',
+    operation_summary="HR ozi yaratgan studentlarini korishi",
+    responses={
+        200: openapi.Response(description="Studentlari", schema=StudentSerializer(many=True)),
+        403: "Permission denied"
+    }
+)
 @api_view(['GET'])
 def student_list_view(request):
     if request.user.role not in [1, 2]:
@@ -140,6 +224,9 @@ def lead_list(request):
     
     serializer = LeadSerializer(leads, many=True)
     return Response(serializer.data)
+
+
+# END HR
 
 
 @api_view(['PUT'])
