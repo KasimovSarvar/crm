@@ -8,8 +8,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import make_password, check_password
 from lead.models import Lead, Student,Payment,Outcome
 from .models import User
-from lead.serialazer import LeadSerializer,StudentSerializer,PaymentSerializer,OutcomeSerializer
-from .serialazer import UserSerializer
+from lead.serialazers import LeadSerializer,StudentSerializer,PaymentSerializer,OutcomeSerializer
+from .serialazers import UserSerializer
 
 
 
