@@ -15,9 +15,7 @@ JWT Authentication
 Docker (optional)
 
 📁 Loyihaning katalog tuzilishi:
-bash
-Copy
-Edit
+```
 institut_crm/
 │
 ├── crm/                  # Asosiy Django app
@@ -33,6 +31,7 @@ institut_crm/
 │
 ├── manage.py
 └── requirements.txt
+```
 ⚙️ O‘rnatish va ishga tushirish:
 1. Repository-ni klonlash:
 ```
