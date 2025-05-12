@@ -52,12 +52,15 @@ def login_view(request):
     username = request.data["username"]
     password = request.data["password"]
 
-    auth = authenticate(request,username=username, password=password)
-    if auth is None:
-        return Response(data={"NONE":"Username or passsword is inncorrect"}, status=status.HTTP_400_BAD_REQUEST)
+    user_model = User.objects.filter(username=username).first()
+    if not user_model:
+        return Response(data={"Error":"Username not found"},status=status.HTTP_400_BAD_REQUEST)
+
+    if not check_password(password,user_model.password):
+        return Response(data={"Error":"Wrong password"},status=status.HTTP_400_BAD_REQUEST)
 
 
-    refresh_token = RefreshToken.for_user(auth)
+    refresh_token = RefreshToken.for_user(user_model)
     access_token = refresh_token.access_token
 
     return Response(data={"access_token":str(access_token),"refresh_token":str(refresh_token)},status=status.HTTP_200_OK)

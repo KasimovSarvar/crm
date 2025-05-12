@@ -1,26 +1,21 @@
-from django.shortcuts import HttpResponse
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from exceptions.exception import CustomApiException
+from exceptions.error_messages import ErrorCodes
 from .models import User
 
 
-class CustomUserMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
+class CustomJWTAuthentication(JWTAuthentication):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user_model = User
 
-    def __call__(self, request):
-        # Get the user_id from session or header
-        user_id = request.session.get("user_id")  # Or from header: request.headers.get("X-USER-ID")
+    def get_user(self, validated_token):
+        user_id = validated_token.get('user_id')
+        user = User.objects.filter(id=user_id).first()
+        if not user:
+            raise CustomApiException(ErrorCodes.UNAUTHORIZED)
+        return user
 
-        if user_id:
-            try:
-                request.user = User.objects.get(id=user_id)
-            except User.DoesNotExist:
-                request.user = None
-        else:
-            request.user = None
-
-        # Continue processing the request
-        response = self.get_response(request)
-        return response
 
 
 
