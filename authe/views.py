@@ -87,3 +87,24 @@ def control_student_view(request):
         student_obj = Student.objects.all()
         return Response(data=StudentSerializer(student_obj,many=True).data, status=status.HTTP_200_OK)
     return Response(data={"Error":"Only super user"}, status=status.HTTP_200_OK)
+
+
+
+
+
+@swagger_auto_schema(methods=['POST'], responses={200: UserSerializer(many=True)})
+@api_view(['POST'])
+def register_view(request):
+    if not request.user.is_authenticated:
+        return Response({"Error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    if request.user.role not in [1, 2]:
+        return Response({"Error": "Only SuperUser or HR can create new user"}, status=status.HTTP_403_FORBIDDEN)
+
+    serializer = UserSerializer(data=request.data)
+
+    if serializer.is_valid():
+        user = serializer.save()
+        return Response({"success": f"User {user.username} successfully created!"}, status=status.HTTP_201_CREATED)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
