@@ -12,26 +12,6 @@ PostgreSQL
 
 JWT Authentication
 
-Docker (optional)
-
-📁 Loyihaning katalog tuzilishi:
-```
-institut_crm/
-│
-├── crm/                  # Asosiy Django app
-│   ├── models.py
-│   ├── views.py
-│   ├── serializers.py
-│   ├── urls.py
-│   └── ...
-│
-├── institut_crm/         # Project sozlamalari
-│   ├── settings.py
-│   └── urls.py
-│
-├── manage.py
-└── requirements.txt
-```
 ⚙️ O‘rnatish va ishga tushirish:
 1. Repository-ni klonlash:
 ```
