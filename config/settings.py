@@ -22,6 +22,7 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
+    "jazzmin",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -33,7 +34,6 @@ INSTALLED_APPS = [
     'drf_yasg',
     'rest_framework',
     'rest_framework_simplejwt',
-
 ]
 
 MIDDLEWARE = [
@@ -44,10 +44,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+  
     "authe.middleware.SuperUserMiddle"
-
-
-
 
 
 ]
@@ -125,6 +123,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
+
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=14),
@@ -156,3 +155,13 @@ SWAGGER_SETTINGS = {
     'LOGIN_URL': 'api/v1/auth/login',
     "DEFAULT_MODEL_RENDERING": "example"
 }
+
+
+JAZZMIN_SETTINGS = {
+    "site_title": "CRM Admin",
+    "site_header": "CRM Dashboard",
+    "site_brand": "MyCRM",
+    "welcome_sign": "Welcome to the CRM admin panel",
+    "copyright": "MyCRM",
+}
+
