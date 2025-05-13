@@ -1,12 +1,12 @@
 from django.contrib.auth.views import LoginView
 from django.urls import path
-from  authe.views import home_view,register_view,login_view,control_user_view,control_lead_view,control_student_view,control_outcome_view,control_payment_view
+from  authe.views import me_view,register_view,login_view,control_user_view,control_lead_view,control_student_view,control_outcome_view,control_payment_view
 from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView
 from config.urls import schema_view
 
 
 urlpatterns = [
-    path('', home_view),
+    path('me/', me_view),
     path('register/', register_view),
     path('login/', login_view),
     path('control/user/', control_user_view),

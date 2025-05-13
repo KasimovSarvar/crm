@@ -14,8 +14,8 @@ from .serialazers import UserSerializer
 
 
 @api_view(['GET'])
-def home_view(request):
-    return Response(data={"ok":request.user.username}, status=status.HTTP_200_OK)
+def me_view(request):
+    return Response(data={"username":request.user.username,"password":request.user.password}, status=status.HTTP_200_OK)
 
 
 
