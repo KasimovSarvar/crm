@@ -1,3 +1,4 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from abstraction.base_model import BaseModel
 
@@ -24,3 +25,5 @@ class User(BaseModel):
     status = models.IntegerField(choices=USER_STATUS, default=1, verbose_name="Статус")
     lead_number = models.PositiveIntegerField(default=0, verbose_name="Количество лидов")
     login_time = models.DateTimeField(null=True, blank=True, verbose_name='Время входа')
+
+

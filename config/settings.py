@@ -1,6 +1,8 @@
 from datetime import timedelta
 from pathlib import Path
 
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -14,7 +16,7 @@ SECRET_KEY = 'django-insecure-#lgd+tdbnjcz00th--^bg@-n56o$y+3esspag5uki@g@up!hpb
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -42,6 +44,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+  
+    "authe.middleware.SuperUserMiddle"
+
+
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -125,7 +131,8 @@ SIMPLE_JWT = {
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
+        "authe.jwt_usermodel.CustomJWTAuthentication"
     ]
 }
 
@@ -149,6 +156,7 @@ SWAGGER_SETTINGS = {
     "DEFAULT_MODEL_RENDERING": "example"
 }
 
+
 JAZZMIN_SETTINGS = {
     "site_title": "CRM Admin",
     "site_header": "CRM Dashboard",
@@ -156,3 +164,4 @@ JAZZMIN_SETTINGS = {
     "welcome_sign": "Welcome to the CRM admin panel",
     "copyright": "MyCRM",
 }
+
