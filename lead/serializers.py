@@ -3,8 +3,6 @@ from rest_framework.serializers import ModelSerializer
 from .models import Outcome, CategoryOutlay, Payment, Student, SeasonFacultyLimit, Season, Faculty, University, State, \
     Comment, Lead
 
-
-
 class OutcomeSerializer(ModelSerializer):
     class Meta:
         model = Outcome
