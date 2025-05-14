@@ -19,7 +19,7 @@ class RoleCheckMiddleware:
     def __call__(self, request):
         path = request.path_info
 
-        if path.startswith('/login/') or path.startswith('/swagger/') or path.startswith("/"):
+        if path.startswith('/login/') or path.startswith('/swagger/') or path.startswith("/")  or path.startswith("/admin/"):
             return self.get_response(request)
 
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')

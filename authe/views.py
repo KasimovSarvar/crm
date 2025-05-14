@@ -17,7 +17,6 @@ def register_view(request):
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # Запрещаем создавать SuperUser (роль 1)
     if serializer.validated_data.get('role') == 1:
         return Response(
             {"error": "Only Admin Panel can create a SuperUser."},
