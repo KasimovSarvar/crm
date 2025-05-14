@@ -1,12 +1,15 @@
 from django.http import JsonResponse
 import jwt
 from django.conf import settings
-from .models import User 
+from .models import User
 
 ROLE_ACCESS = {
-    '/admin/': [1,2],
-    '/accountant/': [1, 3],
-    '/admin-restricted/': [1, 4],
+    1: "*",  
+    2: ['register/', 'create/', 'create_user/', 'create_student/', 'change_lead_admin/', 'change_student_admin/', 
+    'lead_list/', 'student_list/', 'lead_update/', 'student_update/', 'student_detail/',  ],
+    3: ['payment_list/', 'create_payment/', 'update_payment/', 'balance_report/'],
+    4: ['create_student/', 'amdin_lead_list/', 'lead_update/', 'create_student/', 
+    'my_students_list/', 'student_detail/', ], 
 }
 
 class RoleCheckMiddleware:
@@ -42,11 +45,13 @@ class RoleCheckMiddleware:
             request.user_role = role
 
             # Проверка доступа
-            for allowed_path, allowed_roles in ROLE_ACCESS.items():
-                if path.startswith(allowed_path):
-                    if role not in allowed_roles:
-                        return JsonResponse({"detail": "You do not have permission to access this resource."}, status=403)
-                    break  # если нашлось соответствие — выйти
+            allowed_roles = ROLE_ACCESS.get(role, [])
+            if allowed_roles == "*":  # если полный доступ
+                return self.get_response(request)
+
+            # Проверяем, начинается ли путь с одного из разрешённых
+            if not any(path.startswith(p) for p in allowed_roles):
+                return JsonResponse({"detail": "You do not have permission to access this resource."}, status=403)
 
         except jwt.ExpiredSignatureError:
             return JsonResponse({"detail": "Access token expired, use refresh token to get a new access token."}, status=401)
