@@ -20,7 +20,7 @@ class RoleCheckMiddleware:
         path = request.path_info
 
         # Разрешённые публичные пути
-        if path.startswith('/login/') or path.startswith('/swagger/'):
+        if path.startswith('/login/') or path.startswith('/swagger/') or path.startswith("/"):
             return self.get_response(request)
 
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
