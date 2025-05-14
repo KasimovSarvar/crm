@@ -23,3 +23,4 @@ urlpatterns = [
     path('lead_update/<int:pk>/', lead_update_view, name='lead-update'),
 ]
 
+
