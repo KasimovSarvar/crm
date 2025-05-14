@@ -23,11 +23,11 @@ from rest_framework import permissions
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Dommaster APIv1",
+        title="Institute CRM system",
         default_version="v1",
-        description="API for project Dommaster",
+        description="API for Institute CRM system",
         terms_of_service="",
-        contact=openapi.Contact(email="email@gmail.com"),
+        contact = openapi.Contact(email="nurb8197@gmail.com"),
         license=openapi.License(name="BSD License"),
     ),
     public=True,
