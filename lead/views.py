@@ -278,6 +278,14 @@ def student_list_view(request):
 
 
 # END HR...
+@swagger_auto_schema(
+    method='get',
+    operation_summary="Admin uchun Leadlar ro'yxati",
+    responses={
+        200: openapi.Response("Leadlar ro'yxati", LeadSerializer(many=True)),
+        400: "Not authenticated"
+    }
+)
 
 @api_view(['GET'])
 def admin_lead_view(request):
@@ -292,6 +300,20 @@ def admin_lead_view(request):
     serializer = LeadSerializer(leads, many=True)
     return Response(serializer.data)
 
+@swagger_auto_schema(
+    method='put',
+    operation_summary="Lead ma'lumotlarini yangilash",
+    manual_parameters=[
+        openapi.Parameter('lead_id', openapi.IN_PATH, description="Lead ID", type=openapi.TYPE_INTEGER)
+    ],
+    request_body=LeadSerializer,
+    responses={
+        200: openapi.Response("Yangilangan lead ma'lumotlari", LeadSerializer()),
+        400: "Not authenticated or validation error",
+        403: "Access denied",
+        404: "Lead not found"
+    }
+)
 
 @api_view(['PUT'])
 def lead_update_view(request, lead_id):
@@ -313,7 +335,17 @@ def lead_update_view(request, lead_id):
     return Response({'message':'You are not Admin'}, status=status.HTTP_403_FORBIDDEN)
     
 
- 
+@swagger_auto_schema(
+    method='post',
+    operation_summary="Yangi student yaratish",
+    request_body=StudentSerializer,
+    responses={
+        201: openapi.Response("Yaratilgan student ma'lumotlari", StudentSerializer()),
+        400: "Not authenticated or validation error",
+        403: "Access denied",
+        404: "Lead not found"
+    }
+)
 
 @api_view(['POST'])
 def create_student(request):
@@ -338,6 +370,15 @@ def create_student(request):
         return Response(serializer.data, status=201)
     return Response(serializer.errors, status=400)
 
+@swagger_auto_schema(
+    method='get',
+    operation_summary="Adminning studentlar ro'yxati",
+    responses={
+        200: openapi.Response("Studentlar ro'yxati", StudentSerializer(many=True)),
+        400: "Not authenticated",
+        403: "Access denied"
+    }
+)
 
 @api_view(['GET'])
 def my_students_list_view(request):
@@ -349,6 +390,21 @@ def my_students_list_view(request):
         serializer = StudentSerializer(student, many=True)
         return Response({'message':'success'},serializer.data)
     return Response({'message':'You are not Admin'}, status=status.HTTP_403_FORBIDDEN)
+
+@swagger_auto_schema(
+    method='patch',
+    operation_summary="Student ma'lumotlarini yangilash",
+    manual_parameters=[
+        openapi.Parameter('pk', openapi.IN_PATH, description="Student ID", type=openapi.TYPE_INTEGER)
+    ],
+    request_body=StudentSerializer,
+    responses={
+        200: openapi.Response("Yangilangan student ma'lumotlari", StudentSerializer()),
+        400: "Not authenticated or validation error",
+        403: "Access denied",
+        404: "Student not found"
+    }
+)
 
 @api_view(['PATCH'])
 def student_update_view(request, pk):
@@ -374,6 +430,20 @@ def student_update_view(request, pk):
         return Response({'message':'success! update this student'},serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@swagger_auto_schema(
+    method='get',
+    operation_summary="Studentning batafsil ma'lumotini olish",
+    manual_parameters=[
+        openapi.Parameter('id', openapi.IN_PATH, description="Student ID", type=openapi.TYPE_INTEGER)
+    ],
+    responses={
+        200: openapi.Response("Student ma'lumotlari", StudentSerializer()),
+        400: "Not authenticated",
+        403: "Access denied",
+        404: "Student not found"
+    }
+)
+
 @api_view(['GET'])
 def student_detail(request, id):
     if not request.user.is_authenticated:
@@ -389,4 +459,4 @@ def student_detail(request, id):
     serializer = StudentSerializer(student)
     return Response(serializer.data)
 
- 
+# END ADMIN...
