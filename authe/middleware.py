@@ -4,22 +4,22 @@ from django.conf import settings
 from .models import User
 
 ROLE_ACCESS = {
-    1: "*",  
+    1: "*",
     2: ['register/', 'create_lead/', 'create_user/', 'create_student/', 'change_lead_admin/', 'change_student_admin/',
     'lead_list/', 'student_list/', 'lead_update/', 'student_update/', 'student_detail/',  ],
     3: ['payment_list/', 'create_payment/', 'update_payment/', 'balance_report/'],
     4: ['admin_create_student/', 'admin_lead_list/', 'lead_update/', 'create_student/',
-    'my_students_list/', 'student_detail/', ], 
+    'my_students_list/', 'student_detail/', ],
 }
 
 class RoleCheckMiddleware:
-    def __init__(self, get_response):
+    def init(self, get_response):
         self.get_response = get_response
 
-    def __call__(self, request):
+    def call(self, request):
         path = request.path_info
 
-        if path.startswith('/login/') or path.startswith('/swagger/') or path.startswith("/"):
+        if path.startswith('/login/') or path.startswith('/swagger/') or path.startswith("/")  or path.startswith("/admin/"):
             return self.get_response(request)
 
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
@@ -44,7 +44,7 @@ class RoleCheckMiddleware:
             request.user_role = role
 
             allowed_roles = ROLE_ACCESS.get(role, [])
-            if allowed_roles == "*": 
+            if allowed_roles == "*":
                 return self.get_response(request)
 
             if not any(path.startswith(p) for p in allowed_roles):
