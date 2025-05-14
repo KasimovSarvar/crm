@@ -6,28 +6,41 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import check_password
 from .models import User
 from .serializers import UserSerializer
+from django.contrib.auth.hashers import make_password
 
 
 
 @swagger_auto_schema(methods=['POST'],responses={200:UserSerializer(many=True)})
 @api_view(http_method_names=['POST'])
 def register_view(request):
-    # if not request.user.is_authenticated:
-    #     return Response({"Error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
-    if request.user.role not in [1,2]:
-        return Response(data={"Error": "Only SuperUser and HR can create new user"},status=status.HTTP_400_BAD_REQUEST)
+    serializer = UserSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    serial= UserSerializer(data=request.data)
-    if  not serial.is_valid():
-        return Response(data=serial.errors, status=status.HTTP_400_BAD_REQUEST)
+    # Запрещаем создавать SuperUser (роль 1)
+    if serializer.validated_data.get('role') == 1:
+        return Response(
+            {"error": "Only Admin Panel can create a SuperUser."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
-    user_obj = serial.save()
-    user_obj.set_password(user_obj.password)
+    validated_data = serializer.validated_data
+    raw_password = validated_data.get('password')
+
+    user_obj = User(
+        username=validated_data.get('username'),
+        role=validated_data.get('role'),
+        full_name=validated_data.get("full_name"),
+        fixed_salary=validated_data.get("fixed_salary"),
+        phone_number=validated_data.get("phone_number"),
+        status=validated_data.get("status"),
+        lead_number=validated_data.get("lead_number"),
+        login_time=validated_data.get("login_time"),
+        password=make_password(raw_password)
+    )
     user_obj.save()
 
-    if user_obj.role == 1:
-        return Response(data={"NONE": "Super user only admin panel create "}, status=status.HTTP_400_BAD_REQUEST)
-    return Response(data={"ok":user_obj.username}, status=status.HTTP_200_OK)
+    return Response({"message": f"User {user_obj.username} created successfully."}, status=status.HTTP_201_CREATED)
 
 
 @api_view(['POST'])
@@ -35,10 +48,11 @@ def login_view(request):
     username = request.data["username"]
     password = request.data["password"]
 
-    if not username or password:
+    if not username or not password:
         return Response({"message": "Username and password required"}, status=status.HTTP_400_BAD_REQUEST)
 
     user_model = User.objects.filter(username=username).first()
+    print(user_model)
     if not user_model:
         return Response(data={"Error":"Username not found"},status=status.HTTP_400_BAD_REQUEST)
 

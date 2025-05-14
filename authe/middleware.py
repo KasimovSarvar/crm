@@ -19,7 +19,6 @@ class RoleCheckMiddleware:
     def __call__(self, request):
         path = request.path_info
 
-        # Разрешённые публичные пути
         if path.startswith('/login/') or path.startswith('/swagger/') or path.startswith("/"):
             return self.get_response(request)
 
@@ -44,12 +43,10 @@ class RoleCheckMiddleware:
 
             request.user_role = role
 
-            # Проверка доступа
             allowed_roles = ROLE_ACCESS.get(role, [])
-            if allowed_roles == "*":  # если полный доступ
+            if allowed_roles == "*": 
                 return self.get_response(request)
 
-            # Проверяем, начинается ли путь с одного из разрешённых
             if not any(path.startswith(p) for p in allowed_roles):
                 return JsonResponse({"detail": "You do not have permission to access this resource."}, status=403)
 
