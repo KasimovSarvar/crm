@@ -23,7 +23,7 @@ def payment_list(request):
     if not request.user.is_authenticated:
         return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
 
-    if not request.user == 3:
+    if not request.user.role == 3 and not request.user.role == 1:
         return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
 
     payments = Payment.objects.all()
@@ -245,11 +245,14 @@ def lead_list_view(request):
     if request.user.role not in [1, 2]:
         return Response({'message': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
 
-    leads = Lead.objects.filter(created_by=request.user)
+    if request.user.role == 2:
+        leads = Lead.objects.filter(created_by=request.user)
+        serializer = LeadSerializer(leads, many=True)
+        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+
+    leads = Lead.objects.all()
     serializer = LeadSerializer(leads, many=True)
-
     return Response({'data': serializer.data}, status=status.HTTP_200_OK)
-
 
 
 @swagger_auto_schema(
@@ -264,17 +267,18 @@ def lead_list_view(request):
 def student_list_view(request):
     if request.user.role not in [1, 2]:
         return Response({'message': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+    if request.user.role == 2:
+        students = Student.objects.filter(admin=request.user)
+        serializer = StudentSerializer(students, many=True)
+        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 
-    students = Student.objects.filter(admin=request.user)
-    serializer = StudentSerializer(students, many=True)
+    student = Student.objects.all()
+    serializer = StudentSerializer(student, many=True)
     return Response({'data': serializer.data}, status=status.HTTP_200_OK)
-
-# END HR
-
 
 
 @api_view(['GET'])
-def lead_list(request):
+def admin_lead_view(request):
     if not request.user.is_authenticated:
         return Response({"error": "Not authenticated"}, status=status.HTTP_400_BAD_REQUEST)
     
@@ -287,6 +291,7 @@ def lead_list(request):
     return Response(serializer.data)
 
 
+# END HR...
 
 
 @api_view(['PUT'])
