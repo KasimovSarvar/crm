@@ -4,19 +4,16 @@ from  rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import check_password
-from lead.models import Lead, Student,Payment,Outcome
 from .models import User
-from lead.serializers import LeadSerializer,StudentSerializer,PaymentSerializer,OutcomeSerializer
 from .serializers import UserSerializer
 
 
 
-swagger_auto_schema(methods=['POST'],responses={200:UserSerializer(many=True)})
+@swagger_auto_schema(methods=['POST'],responses={200:UserSerializer(many=True)})
 @api_view(http_method_names=['POST'])
 def register_view(request):
-    if not request.user.is_authenticated:
-        return Response({"Error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
-
+    # if not request.user.is_authenticated:
+    #     return Response({"Error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
     if request.user.role not in [1,2]:
         return Response(data={"Error": "Only SuperUser and HR can create new user"},status=status.HTTP_400_BAD_REQUEST)
 
@@ -52,47 +49,5 @@ def login_view(request):
     return Response(data={"access_token":str(access_token),"refresh_token":str(refresh_token)},status=status.HTTP_200_OK)
 
   
-@swagger_auto_schema(methods=['GET'],responses={200:UserSerializer(many=True)})
-@api_view(['GET'])
-def control_user_view(request):
-    if request.user.role == 1:
-        user_obj = User.objects.all()
-        return Response(data=UserSerializer(user_obj,many=True).data, status=status.HTTP_200_OK)
-    return Response(data={"Error":"Only super user"}, status=status.HTTP_200_OK)
 
-
-@swagger_auto_schema(methods=['GET'],responses={200:LeadSerializer(many=True)})
-@api_view(['GET'])
-def control_lead_view(request):
-    if request.user.role == 1:
-        lead_obj = Lead.objects.all()
-        return Response(data=LeadSerializer(lead_obj,many=True).data, status=status.HTTP_200_OK)
-    return Response(data={"Error":"Only super user"}, status=status.HTTP_200_OK)
-
-
-@swagger_auto_schema(methods=['GET'],responses={200:StudentSerializer(many=True)})
-@api_view(['GET'])
-def control_student_view(request):
-    if request.user.role == 1:
-        student_obj = Student.objects.all()
-        return Response(data=StudentSerializer(student_obj,many=True).data, status=status.HTTP_200_OK)
-    return Response(data={"Error":"Only super user"}, status=status.HTTP_200_OK)
-
-  
-@swagger_auto_schema(methods=['GET'],responses={200:PaymentSerializer(many=True)})
-@api_view(['GET'])
-def control_payment_view(request):
-    if request.user.role == 1:
-        payment_obj = Payment.objects.all()
-        return Response(data=PaymentSerializer(payment_obj,many=True).data, status=status.HTTP_200_OK)
-    return Response(data={"Error":"Only super user"}, status=status.HTTP_200_OK)
-
-  
-@swagger_auto_schema(methods=['GET'],responses={200:OutcomeSerializer(many=True)})
-@api_view(['GET'])
-def control_outcome_view(request):
-    if request.user.role == 1:
-        outcome_obj = Outcome.objects.all()
-        return Response(data=OutcomeSerializer(outcome_obj,many=True).data, status=status.HTTP_200_OK)
-    return Response(data={"Error":"Only super user"}, status=status.HTTP_200_OK)
 
