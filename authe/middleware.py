@@ -17,9 +17,9 @@ class RoleCheckMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        path = request.path_info
+        path = request.path_info.lstrip('/')
 
-        if path.startswith('/login/') or path.startswith('/swagger/') or path.startswith("/")  or path.startswith("/admin/"):
+        if path.startswith('/login/') or path.startswith('/swagger/') or path == "/"  or path.startswith("/admin/"):
             return self.get_response(request)
 
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
@@ -30,9 +30,6 @@ class RoleCheckMiddleware:
 
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-            if payload.get("type") != "access":
-                return JsonResponse({"detail": "Invalid token type"}, status=401)
-
             user_id = payload.get("user_id")
             role = payload.get("role")
 
