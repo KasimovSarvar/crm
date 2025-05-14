@@ -21,6 +21,7 @@ urlpatterns = [
     path('update_payment/<int:pk>/', update_payment, name='update-payment'),
     path('balance_report/', balance_report, name='balance-report'),
     path('lead_update/<int:pk>/', lead_update_view, name='lead-update'),
+
 ]
 
 
