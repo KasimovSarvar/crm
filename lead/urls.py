@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from .import views
 from .views import is_accountant, payment_list, create_payment, update_payment, balance_report, create_lead_view, create_user_view, create_student_view, change_lead_admin_view, change_student_admin_view, lead_list_view, student_list_view ,lead_list, lead_update_view, create_student, my_students_list_view, student_update_view, student_detail
 
 urlpatterns = [
@@ -24,3 +24,4 @@ urlpatterns = [
     path('lead_list/<int:pk>/', lead_list, name='lead-list'),
     path('lead_update/<int:pk>/', lead_update_view, name='lead-update'),
 ]
+
