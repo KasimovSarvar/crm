@@ -20,12 +20,6 @@ def is_accountant(user):
 )
 @api_view(['GET'])
 def payment_list(request):
-    if not request.user.is_authenticated:
-        return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    if not request.user.role == 3 and not request.user.role == 1:
-        return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
-
     payments = Payment.objects.all()
     serializer = PaymentSerializer(payments, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
