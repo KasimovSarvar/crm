@@ -13,10 +13,10 @@ ROLE_ACCESS = {
 }
 
 class RoleCheckMiddleware:
-    def init(self, get_response):
+    def __init__(self, get_response):
         self.get_response = get_response
 
-    def call(self, request):
+    def __call__(self, request):
         path = request.path_info
 
         if path.startswith('/login/') or path.startswith('/swagger/') or path.startswith("/")  or path.startswith("/admin/"):
