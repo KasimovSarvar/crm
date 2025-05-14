@@ -13,7 +13,8 @@ from drf_yasg import openapi
 
 @swagger_auto_schema(
     method='get',
-    responses={200: PaymentSerializer(many=True)}
+    responses={200: PaymentSerializer(many=True)},
+    tags=["Payment"]
 )
 @api_view(['GET'])
 def payment_list(request):
@@ -25,7 +26,8 @@ def payment_list(request):
 @swagger_auto_schema(
     method='post',
     request_body=PaymentSerializer,
-    responses={201: PaymentSerializer}
+    responses={201: PaymentSerializer},
+    tags=["Payment"]
 )
 @api_view(['POST'])
 def create_payment(request):
@@ -42,7 +44,8 @@ def create_payment(request):
     responses={
         200: PaymentSerializer,
         404: openapi.Response(description="Payment not found")
-    }
+    },
+    tags=["Payment"]
 )
 @api_view(['PUT'])
 def update_payment(request, pk):
@@ -61,7 +64,8 @@ def update_payment(request, pk):
     method='get',
     responses={
         200: openapi.Response(description="Returns total income, expense, and balance.")
-    }
+    },
+    tags=["Payment"]
 )
 @api_view(['GET'])
 def balance_report(request):
@@ -85,7 +89,8 @@ def balance_report(request):
         201: openapi.Response(description="Lead qoshildi", schema=LeadSerializer),
         400: "Invalid credentials",
         403: "Permission denied"
-    }
+    },
+    tags=["Lead"]
 )
 @api_view(['POST'])
 @api_view(['POST'])
@@ -105,7 +110,8 @@ def create_lead_view(request):
         201: openapi.Response(description="User qoshildi", schema=UserSerializer),
         400: "Invalid credentials",
         403: "Permission denied"
-    }
+    },
+    tags=["User"]
 )
 @api_view(['POST'])
 def create_user_view(request):
@@ -128,7 +134,8 @@ def create_user_view(request):
         201: openapi.Response(description="Student qoshildi", schema=StudentSerializer),
         400: "Invalid credentials",
         403: "Permission denied"
-    }
+    },
+    tags=["Student"]
 )
 @api_view(['POST'])
 def create_student_view(request):
@@ -150,7 +157,8 @@ def create_student_view(request):
         400: "admin_id yoki notogri",
         403: "Permission denied",
         404: "Lead yoki admin topilmadi"
-    }
+    },
+    tags=["Lead"]
 )
 @api_view(['PUT'])
 def change_lead_admin_view(request, lead_id):
@@ -182,7 +190,8 @@ def change_lead_admin_view(request, lead_id):
         400: "admin_id shart yoki notogri",
         403: "Permission denied",
         404: "Student yoki admin topilmadi"
-    }
+    },
+    tags=["Student"]
 )
 @api_view(['PUT'])
 def change_student_admin_view(request, student_id):
@@ -209,12 +218,13 @@ def change_student_admin_view(request, student_id):
     responses={
         200: openapi.Response(description="Leadlari", schema=LeadSerializer(many=True)),
         403: "Permission denied"
-    }
+    },
+    tags=["Lead"]
 )
 @api_view(['GET'])
 def lead_list_view(request):
-    if request.user.role == 2:
-        leads = Lead.objects.filter(created_by=request.user)
+    if request.user_role == 2:
+        leads = Lead.objects.filter(created_by=request.user_role)
         serializer = LeadSerializer(leads, many=True)
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 
@@ -229,12 +239,13 @@ def lead_list_view(request):
     responses={
         200: openapi.Response(description="Studentlari", schema=StudentSerializer(many=True)),
         403: "Permission denied"
-    }
+    },
+    tags=["Student"]
 )
 @api_view(['GET'])
 def student_list_view(request):
-    if request.user.role == 2:
-        students = Student.objects.filter(admin=request.user)
+    if request.user_role == 2:
+        students = Student.objects.filter(admin=request.user_role)
         serializer = StudentSerializer(students, many=True)
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 
@@ -250,7 +261,8 @@ def student_list_view(request):
     responses={
         200: openapi.Response("Leadlar ro'yxati", LeadSerializer(many=True)),
         400: "Not authenticated"
-    }
+    },
+    tags=["Lead"]
 )
 @api_view(['GET'])
 def admin_lead_view(request):
@@ -275,7 +287,8 @@ def admin_lead_view(request):
         400: "Not authenticated or validation error",
         403: "Access denied",
         404: "Lead not found"
-    }
+    },
+    tags=["Lead"]
 )
 @api_view(['PUT'])
 def lead_update_view(request, lead_id):
@@ -301,7 +314,8 @@ def lead_update_view(request, lead_id):
         400: "Not authenticated or validation error",
         403: "Access denied",
         404: "Lead not found"
-    }
+    },
+    tags=["Student"]
 )
 @api_view(['POST'])
 def create_student(request):
@@ -330,7 +344,8 @@ def create_student(request):
         200: openapi.Response("Studentlar ro'yxati", StudentSerializer(many=True)),
         400: "Not authenticated",
         403: "Access denied"
-    }
+    },
+    tags=["Student"]
 )
 @api_view(['GET'])
 def my_students_list_view(request):
@@ -353,7 +368,8 @@ def my_students_list_view(request):
         400: "Not authenticated or validation error",
         403: "Access denied",
         404: "Student not found"
-    }
+    },
+    tags=["Student"]
 )
 @api_view(['PATCH'])
 def student_update_view(request, pk):
@@ -388,7 +404,8 @@ def student_update_view(request, pk):
         400: "Not authenticated",
         403: "Access denied",
         404: "Student not found"
-    }
+    },
+    tags=["Student"]
 )
 @api_view(['GET'])
 def student_detail(request, id):
