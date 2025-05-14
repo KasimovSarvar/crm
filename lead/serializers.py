@@ -3,8 +3,6 @@ from rest_framework.serializers import ModelSerializer
 from .models import Outcome, CategoryOutlay, Payment, Student, SeasonFacultyLimit, Season, Faculty, University, State, \
     Comment, Lead
 
-
-
 class OutcomeSerializer(ModelSerializer):
     class Meta:
         model = Outcome
@@ -24,6 +22,7 @@ class StudentSerializer(ModelSerializer):
     class Meta:
         model = Student
         fields = ('id', 'admin', 'state', 'university', 'season', 'education_type', 'faculty', 'study_format', 'first_name', 'last_name', 'phone_number', 'passport_series')
+        read_only_fields = ['created_by']
 
 class SeasonFacultyLimitSerializer(ModelSerializer):
     class Meta:
@@ -59,3 +58,4 @@ class LeadSerializer(ModelSerializer):
     class Meta:
         model = Lead
         fields = ('id', 'admin', 'first_name', 'last_name', 'passport_series', 'phone_number', 'status', 'type', 'is_checked', 'is_signing_at')
+        read_only_fields = ['created_by']

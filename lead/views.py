@@ -14,60 +14,83 @@ def is_accountant(user):
     return user.is_authenticated and user.role == 3
 
 
+@swagger_auto_schema(
+    method='get',
+    responses={200: PaymentSerializer(many=True)}
+)
 @api_view(['GET'])
 def payment_list(request):
-    if not is_accountant(request.user):
-        return Response({'error': 'Ruxsat yo‘q'}, status=403)
+    if not request.user.is_authenticated:
+        return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    if not request.user.role == 3 and not request.user.role == 1:
+        return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
     payments = Payment.objects.all()
     serializer = PaymentSerializer(payments, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
-    return Response(serializer.data)
 
-
+@swagger_auto_schema(
+    method='post',
+    request_body=PaymentSerializer,
+    responses={201: PaymentSerializer}
+)
 @api_view(['POST'])
 def create_payment(request):
     if not is_accountant(request.user):
-        return Response({'error': 'Ruxsat yo‘q'}, status=403)
+        return Response({'error': 'Permission denied'}, status=status.HTTP_401_UNAUTHORIZED)
     serializer = PaymentSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
-        return Response(serializer.data, status=201)
-    return Response(serializer.errors, status=400)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@swagger_auto_schema(
+    method='put',
+    request_body=PaymentSerializer,
+    responses={
+        200: PaymentSerializer,
+        404: openapi.Response(description="Payment not found")
+    }
+)
 @api_view(['PUT'])
 def update_payment(request, pk):
     if not is_accountant(request.user):
-        return Response({'error': 'Ruxsat yo‘q'}, status=403)
+        return Response({'error': 'Permission denied'}, status=status.HTTP_401_UNAUTHORIZED)
     payment = Payment.objects.filter(id=pk).first()
     if not payment:
-        return Response({'error': 'Payment not found'}, status=404)
+        return Response({'error': 'Payment not found'}, status=status.HTTP_404_NOT_FOUND)
     serializer = PaymentSerializer(payment, data=request.data)
     if serializer.is_valid():
         serializer.save()
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    return Response(serializer.errors, status=400)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@swagger_auto_schema(
+    method='get',
+    responses={
+        200: openapi.Response(description="Returns total income, expense, and balance.")
+    }
+)
 @api_view(['GET'])
 def balance_report(request):
     if not is_accountant(request.user):
-        return Response({'error': 'Ruxsat yo‘q'}, status=403)
-    total_income = Payment.objects.filter(is_payed='payed').aggregate(Sum('amount'))['amount__sum'] or 0
-    total_expense = Outcome.objects.aggregate(Sum('amount'))['amount__sum'] or 0
+        return Response({'error': 'Permission denied'}, status=status.HTTP_401_UNAUTHORIZED)
+    total_income = Payment.objects.filter(is_payed='payed').aggregate(Sum('amount'))['amount__sum']
+    total_expense = Outcome.objects.aggregate(Sum('amount'))['amount__sum']
     balance = total_income - total_expense
 
     return Response({
         'total_income': total_income,
         'total_expense': total_expense,
         'balance': balance
-    })
-
+    }, status=status.HTTP_200_OK)
 
 # HR
-
-
 @swagger_auto_schema(
     method='post',
     operation_summary="HR yoki SuperUser lead yaratishi",
@@ -222,11 +245,14 @@ def lead_list_view(request):
     if request.user.role not in [1, 2]:
         return Response({'message': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
 
-    leads = Lead.objects.filter(created_by=request.user)
+    if request.user.role == 2:
+        leads = Lead.objects.filter(created_by=request.user)
+        serializer = LeadSerializer(leads, many=True)
+        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+
+    leads = Lead.objects.all()
     serializer = LeadSerializer(leads, many=True)
-
     return Response({'data': serializer.data}, status=status.HTTP_200_OK)
-
 
 
 @swagger_auto_schema(
@@ -241,14 +267,28 @@ def lead_list_view(request):
 def student_list_view(request):
     if request.user.role not in [1, 2]:
         return Response({'message': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+    if request.user.role == 2:
+        students = Student.objects.filter(admin=request.user)
+        serializer = StudentSerializer(students, many=True)
+        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 
-    students = Student.objects.filter(admin=request.user)
-    serializer = StudentSerializer(students, many=True)
+    student = Student.objects.all()
+    serializer = StudentSerializer(student, many=True)
     return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 
 
+# END HR...
+@swagger_auto_schema(
+    method='get',
+    operation_summary="Admin uchun Leadlar ro'yxati",
+    responses={
+        200: openapi.Response("Leadlar ro'yxati", LeadSerializer(many=True)),
+        400: "Not authenticated"
+    }
+)
+
 @api_view(['GET'])
-def lead_list(request):
+def admin_lead_view(request):
     if not request.user.is_authenticated:
         return Response({"error": "Not authenticated"}, status=status.HTTP_400_BAD_REQUEST)
     
@@ -259,9 +299,6 @@ def lead_list(request):
     
     serializer = LeadSerializer(leads, many=True)
     return Response(serializer.data)
-
-
-# END HR...
 
 
 @api_view(['PUT'])
@@ -282,33 +319,16 @@ def lead_update_view(request, lead_id):
             return Response({'message':'success! update this lead'},serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     return Response({'message':'You are not Admin'}, status=status.HTTP_403_FORBIDDEN)
-    
 
- 
-
-@api_view(['POST'])
-def create_student(request):
-    if not request.user.is_authenticated:
-        return Response({"error": "Not authenticated"}, status=status.HTTP_400_BAD_REQUEST)
-
-    lead_id = request.data.get("lead")
-
-    if not lead_id:
-        return Response({'message': 'Lead id not found'}, status=400)
-
-    lead = Lead.objects.filter(id=lead_id).first()
-    if not lead:
-        return Response({'message': 'Lead not found'}, status=404)
-
-    if request.user.role == 4 and lead.admin != request.user:
-        return Response({'message': 'this lead not for you'}, status=403)
-
-    serializer = StudentSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=201)
-    return Response(serializer.errors, status=400)
-
+@swagger_auto_schema(
+    method='get',
+    operation_summary="Adminning studentlar ro'yxati",
+    responses={
+        200: openapi.Response("Studentlar ro'yxati", StudentSerializer(many=True)),
+        400: "Not authenticated",
+        403: "Access denied"
+    }
+)
 
 @api_view(['GET'])
 def my_students_list_view(request):
@@ -320,6 +340,21 @@ def my_students_list_view(request):
         serializer = StudentSerializer(student, many=True)
         return Response({'message':'success'},serializer.data)
     return Response({'message':'You are not Admin'}, status=status.HTTP_403_FORBIDDEN)
+
+@swagger_auto_schema(
+    method='patch',
+    operation_summary="Student ma'lumotlarini yangilash",
+    manual_parameters=[
+        openapi.Parameter('pk', openapi.IN_PATH, description="Student ID", type=openapi.TYPE_INTEGER)
+    ],
+    request_body=StudentSerializer,
+    responses={
+        200: openapi.Response("Yangilangan student ma'lumotlari", StudentSerializer()),
+        400: "Not authenticated or validation error",
+        403: "Access denied",
+        404: "Student not found"
+    }
+)
 
 @api_view(['PATCH'])
 def student_update_view(request, pk):
@@ -333,8 +368,8 @@ def student_update_view(request, pk):
     if not student:
         return Response({'message': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
     
-    if user.role != 4:
-        return Response({'message':'You are not Admin'}, status=status.HTTP_403_FORBIDDEN)
+    if user.role == 3:
+        return Response({'message':'You have no right'}, status=status.HTTP_403_FORBIDDEN)
     
     if not student.admin == user:
         return Response({'message':'You can not update this student'}, status=status.HTTP_403_FORBIDDEN)
@@ -344,6 +379,20 @@ def student_update_view(request, pk):
         serializer.save()
         return Response({'message':'success! update this student'},serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@swagger_auto_schema(
+    method='get',
+    operation_summary="Studentning batafsil ma'lumotini olish",
+    manual_parameters=[
+        openapi.Parameter('id', openapi.IN_PATH, description="Student ID", type=openapi.TYPE_INTEGER)
+    ],
+    responses={
+        200: openapi.Response("Student ma'lumotlari", StudentSerializer()),
+        400: "Not authenticated",
+        403: "Access denied",
+        404: "Student not found"
+    }
+)
 
 @api_view(['GET'])
 def student_detail(request, id):
@@ -360,4 +409,4 @@ def student_detail(request, id):
     serializer = StudentSerializer(student)
     return Response(serializer.data)
 
- 
+# END ADMIN...

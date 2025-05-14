@@ -54,6 +54,8 @@ class Lead(BaseModel):
     type = models.CharField(max_length=11, choices=LEAD_TYPE, default='other', verbose_name='Тип')
     is_checked = models.BooleanField(default=False, verbose_name='Проверено')
     is_signing_at = models.DateField(blank=True, null=True, verbose_name='Подписан')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, related_name="leads",
+                                   verbose_name="Создан каким HR")
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -185,6 +187,8 @@ class Student(BaseModel):
     last_name = models.CharField(max_length=100, verbose_name='Фамилия')
     phone_number = models.CharField(max_length=20, verbose_name='Номер телефона')
     passport_series = models.CharField(max_length=12, null=True, blank=True, verbose_name='Серия паспорта')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, related_name="students",
+                                   verbose_name="Создан каким HR")
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"

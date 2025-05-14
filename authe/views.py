@@ -1,147 +1,46 @@
-from django.contrib.auth import authenticate
-from django.shortcuts import render
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from  rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth.hashers import make_password, check_password
-from lead.models import Lead, Student
+from django.contrib.auth.hashers import check_password
 from .models import User
-from lead.serializers import LeadSerializer,StudentSerializer
 from .serializers import UserSerializer
-
-
-
-@api_view(['GET'])
-def home_view(request):
-    return Response(data={"ok":request.user.username}, status=status.HTTP_200_OK)
+from django.contrib.auth.hashers import make_password
 
 
 
 @swagger_auto_schema(methods=['POST'],responses={200:UserSerializer(many=True)})
 @api_view(http_method_names=['POST'])
 def register_view(request):
-    if request.user.role != 1:
-        return Response(data={"Error":"Only super user can create new user"},status=status.HTTP_400_BAD_REQUEST)
-
-    serial= UserSerializer(data=request.data)
-    if  not serial.is_valid():
-        return Response(data=serial.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-    user_obj = serial.save()
-    user_obj.set_password(user_obj.password)
-    user_obj.save()
-
-    if user_obj.role == 1: #3
-        return Response(data={"NONE": "Super user only admin panel create "}, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-    return Response(data={"ok":user_obj.username}, status=status.HTTP_200_OK)
-
-
-
-
-
-@api_view(['POST'])
-def login_view(request):
-    username = request.data["username"]
-    password = request.data["password"]
-
-    auth = authenticate(request,username=username, password=password)
-    if auth is None:
-        return Response(data={"NONE":"Username or passsword is inncorrect"}, status=status.HTTP_400_BAD_REQUEST)
-
-
-    refresh_token = RefreshToken.for_user(auth)
-    access_token = refresh_token.access_token
-
-    return Response(data={"access_token":str(access_token),"refresh_token":str(refresh_token)},status=status.HTTP_200_OK)
-
-@swagger_auto_schema(methods=['GET'],responses={200:UserSerializer(many=True)})
-@api_view(['GET'])
-def control_user_view(request):
-    if request.user.role == 1:
-        user_obj = User.objects.all()
-        return Response(data=UserSerializer(user_obj,many=True).data, status=status.HTTP_200_OK)
-    return Response(data={"Error":"Only super user"}, status=status.HTTP_200_OK)
-
-
-@swagger_auto_schema(methods=['GET'],responses={200:LeadSerializer(many=True)})
-@api_view(['GET'])
-def control_lead_view(request):
-    if request.user.role == 1:
-        lead_obj = Lead.objects.all()
-        return Response(data=LeadSerializer(lead_obj,many=True).data, status=status.HTTP_200_OK)
-    return Response(data={"Error":"Only super user"}, status=status.HTTP_200_OK)
-
-
-@swagger_auto_schema(methods=['GET'],responses={200:StudentSerializer(many=True)})
-@api_view(['GET'])
-def control_student_view(request):
-    if request.user.role == 1:
-        student_obj = Student.objects.all()
-        return Response(data=StudentSerializer(student_obj,many=True).data, status=status.HTTP_200_OK)
-    return Response(data={"Error":"Only super user"}, status=status.HTTP_200_OK)
-
-
-
-
-
-@swagger_auto_schema(methods=['POST'], responses={200: UserSerializer(many=True)})
-@api_view(['POST'])
-def user_register(request):
-    if not request.user.is_authenticated:
-        return Response({"Error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
-
-    if request.user.role not in [1, 2]:
-        return Response({"Error": "Only SuperUser or HR can create new user"}, status=status.HTTP_403_FORBIDDEN)
-
     serializer = UserSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    if serializer.is_valid():
-        user = serializer.save()
-        return Response({"success": f"User {user.username} successfully created!"}, status=status.HTTP_201_CREATED)
+    # Запрещаем создавать SuperUser (роль 1)
+    if serializer.validated_data.get('role') == 1:
+        return Response(
+            {"error": "Only Admin Panel can create a SuperUser."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    validated_data = serializer.validated_data
+    raw_password = validated_data.get('password')
 
-
-@api_view(['GET'])
-def home_view(request):
-    return Response(data={"ok":request.user.username}, status=status.HTTP_200_OK)
-
-
-
-@swagger_auto_schema(methods=['POST'],responses={200:UserSerializer(many=True)})
-@api_view(http_method_names=['POST'])
-def register_view(request):
-    if request.user.role != 1: #4
-        return Response(data={"Error":"Only super user can create new user"},status=status.HTTP_400_BAD_REQUEST)
-
-    serial= UserSerializer(data=request.data)
-    if  not serial.is_valid():
-        return Response(data=serial.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-    user_obj = serial.save()
-    user_obj.set_password(user_obj.password)
+    user_obj = User(
+        username=validated_data.get('username'),
+        role=validated_data.get('role'),
+        full_name=validated_data.get("full_name"),
+        fixed_salary=validated_data.get("fixed_salary"),
+        phone_number=validated_data.get("phone_number"),
+        status=validated_data.get("status"),
+        lead_number=validated_data.get("lead_number"),
+        login_time=validated_data.get("login_time"),
+        password=make_password(raw_password)
+    )
     user_obj.save()
 
-    if user_obj.role == 1: #3
-        return Response(data={"NONE": "Super user only admin panel create "}, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-    return Response(data={"ok":user_obj.username}, status=status.HTTP_200_OK)
-
-
-
+    return Response({"message": f"User {user_obj.username} created successfully."}, status=status.HTTP_201_CREATED)
 
 
 @api_view(['POST'])
@@ -149,38 +48,24 @@ def login_view(request):
     username = request.data["username"]
     password = request.data["password"]
 
-    auth = authenticate(request,username=username, password=password)
-    if auth is None:
-        return Response(data={"NONE":"Username or passsword is inncorrect"}, status=status.HTTP_400_BAD_REQUEST)
+    if not username or not password:
+        return Response({"message": "Username and password required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    user_model = User.objects.filter(username=username).first()
+    print(user_model)
+    if not user_model:
+        return Response(data={"Error":"Username not found"},status=status.HTTP_400_BAD_REQUEST)
+
+    if not check_password(password,user_model.password):
+        return Response(data={"Error":"Wrong password"},status=status.HTTP_400_BAD_REQUEST)
 
 
-    refresh_token = RefreshToken.for_user(auth)
+    refresh_token = RefreshToken.for_user(user_model)
     access_token = refresh_token.access_token
+    access_token['role'] = user_model.role
 
     return Response(data={"access_token":str(access_token),"refresh_token":str(refresh_token)},status=status.HTTP_200_OK)
 
-@swagger_auto_schema(methods=['GET'],responses={200:UserSerializer(many=True)})
-@api_view(['GET'])
-def control_user_view(request):
-    if request.user.role == 1:
-        user_obj = User.objects.all()
-        return Response(data=UserSerializer(user_obj,many=True).data, status=status.HTTP_200_OK)
-    return Response(data={"Error":"Only super user"}, status=status.HTTP_200_OK)
+  
 
 
-@swagger_auto_schema(methods=['GET'],responses={200:LeadSerializer(many=True)})
-@api_view(['GET'])
-def control_lead_view(request):
-    if request.user.role == 1:
-        lead_obj = Lead.objects.all()
-        return Response(data=LeadSerializer(lead_obj,many=True).data, status=status.HTTP_200_OK)
-    return Response(data={"Error":"Only super user"}, status=status.HTTP_200_OK)
-
-
-@swagger_auto_schema(methods=['GET'],responses={200:StudentSerializer(many=True)})
-@api_view(['GET'])
-def control_student_view(request):
-    if request.user.role == 1:
-        student_obj = Student.objects.all()
-        return Response(data=StudentSerializer(student_obj,many=True).data, status=status.HTTP_200_OK)
-    return Response(data={"Error":"Only super user"}, status=status.HTTP_200_OK)
