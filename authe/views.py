@@ -35,6 +35,9 @@ def login_view(request):
     username = request.data["username"]
     password = request.data["password"]
 
+    if not username or password:
+        return Response({"message": "Username and password required"}, status=status.HTTP_400_BAD_REQUEST)
+
     user_model = User.objects.filter(username=username).first()
     if not user_model:
         return Response(data={"Error":"Username not found"},status=status.HTTP_400_BAD_REQUEST)
@@ -45,6 +48,7 @@ def login_view(request):
 
     refresh_token = RefreshToken.for_user(user_model)
     access_token = refresh_token.access_token
+    access_token['role'] = user_model.role
 
     return Response(data={"access_token":str(access_token),"refresh_token":str(refresh_token)},status=status.HTTP_200_OK)
 
