@@ -6,4 +6,4 @@ from authe.models import User
 class UserSerializer(ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'password', 'full_name', 'role', 'fixed_salary', 'phone_number', 'status', 'lead_number', 'login_time')
+        fields = ('id', 'username', 'password', 'full_name', 'role', 'fixed_salary', 'phone_number', 'status', 'lead_number')
