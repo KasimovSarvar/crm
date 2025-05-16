@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import check_password
 from .models import User
-from .serializers import UserSerializer, SimpleLoginSerializer
+from .serializers import UserSerializer,SimpleLoginSerializer
 from django.contrib.auth.hashers import make_password
 
 
