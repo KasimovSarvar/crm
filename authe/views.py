@@ -8,6 +8,18 @@ from .models import User
 from .serializers import UserSerializer,SimpleLoginSerializer
 from django.contrib.auth.hashers import make_password
 
+@swagger_auto_schema(
+    methods=["GET"],
+    tags=["User"],
+
+
+)
+@api_view(['GET'])
+def me_view(request):
+    return Response(data={"Username":request.user.username,"Password":request.user.password},status=status.HTTP_200_OK)
+
+
+
 
 
 @swagger_auto_schema(methods=['POST'],
