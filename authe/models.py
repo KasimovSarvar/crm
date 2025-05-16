@@ -25,4 +25,6 @@ class User(BaseModel):
     lead_number = models.PositiveIntegerField(default=0, verbose_name="Количество лидов")
     login_time = models.DateTimeField(null=True, blank=True, verbose_name='Время входа')
 
+    def __str__(self):
+        return self.username
 
