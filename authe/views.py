@@ -5,12 +5,15 @@ from rest_framework.decorators import api_view
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import check_password
 from .models import User
-from .serializers import UserSerializer
+from .serializers import UserSerializer, SimpleLoginSerializer
 from django.contrib.auth.hashers import make_password
 
 
 
-@swagger_auto_schema(methods=['POST'],responses={200:UserSerializer(many=True)})
+@swagger_auto_schema(methods=['POST'],
+request_body=UserSerializer,
+responses={200:UserSerializer(many=True)},
+tags=["User"])
 @api_view(http_method_names=['POST'])
 def register_view(request):
     serializer = UserSerializer(data=request.data)
@@ -41,7 +44,12 @@ def register_view(request):
 
     return Response({"message": f"User {user_obj.username} created successfully."}, status=status.HTTP_201_CREATED)
 
-
+@swagger_auto_schema(
+    method='post',
+    tags=["User"],
+    request_body=SimpleLoginSerializer,
+    responses={200: "Login successful", 400: "Invalid credentials"}
+)
 @api_view(['POST'])
 def login_view(request):
     username = request.data["username"]
