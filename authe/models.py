@@ -1,3 +1,4 @@
+from django.contrib.auth.hashers import make_password
 from django.db import models
 from abstraction.base_model import BaseModel
 
@@ -24,6 +25,10 @@ class User(BaseModel):
     status = models.IntegerField(choices=USER_STATUS, default=1, verbose_name="Статус")
     lead_number = models.PositiveIntegerField(default=0, verbose_name="Количество лидов")
     login_time = models.DateTimeField(null=True, blank=True, verbose_name='Время входа')
+
+    def save(self, *args, **kwargs):
+        self.password = make_password(self.password)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.username
