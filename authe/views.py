@@ -1,3 +1,4 @@
+from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from  rest_framework.response import Response
@@ -9,40 +10,31 @@ from .serializers import UserSerializer, SimpleLoginSerializer
 from django.contrib.auth.hashers import make_password
 
 
+@swagger_auto_schema(
+    method='post',
+    operation_summary="HR yoki SuperUser user yaratishi",
+    request_body=UserSerializer,
+    responses={
+        201: openapi.Response(description="User qoshildi", schema=UserSerializer),
+        400: "Invalid credentials",
+        403: "Permission denied"
+    },
+    tags=["User"]
+)
+@api_view(['POST'])
+def create_user_view(request):
+    creator_role = request.user.role
+    new_user_role = int(request.data.get("role", 4))
+    if creator_role == 2 and new_user_role == 1:
+        return Response({"error": "HR cannot create a SuperUser."}, status=status.HTTP_403_FORBIDDEN)
 
-@swagger_auto_schema(methods=['POST'],
-request_body=UserSerializer,
-responses={200:UserSerializer(many=True)},
-tags=["User"])
-@api_view(http_method_names=['POST'])
-def register_view(request):
     serializer = UserSerializer(data=request.data)
     if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    if serializer.validated_data.get('role') == 1:
-        return Response(
-            {"error": "Only Admin Panel can create a SuperUser."},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
-    validated_data = serializer.validated_data
-    raw_password = validated_data.get('password')
-
-    user_obj = User(
-        username=validated_data.get('username'),
-        role=validated_data.get('role'),
-        full_name=validated_data.get("full_name"),
-        fixed_salary=validated_data.get("fixed_salary"),
-        phone_number=validated_data.get("phone_number"),
-        status=validated_data.get("status"),
-        lead_number=validated_data.get("lead_number"),
-        login_time=validated_data.get("login_time"),
-        password=make_password(raw_password)
-    )
-    user_obj.save()
-
-    return Response({"message": f"User {user_obj.username} created successfully."}, status=status.HTTP_201_CREATED)
+        return Response({'errors': "user with this username already exists."}, status=status.HTTP_400_BAD_REQUEST)
+    password = serializer.validated_data["password"]
+    user = serializer.save(password=make_password(password))
+    # return Response({"user": UserSerializer(user).data}, status=status.HTTP_201_CREATED)
+    return Response({"message": f"User {user.username} created successfully."}, status=status.HTTP_201_CREATED)
 
 @swagger_auto_schema(
     method='post',
@@ -52,8 +44,8 @@ def register_view(request):
 )
 @api_view(['POST'])
 def login_view(request):
-    username = request.data["username"]
-    password = request.data["password"]
+    username = request.data.get("username")
+    password = request.data.get("password")
 
     if not username or not password:
         return Response({"message": "Username and password required"}, status=status.HTTP_400_BAD_REQUEST)
