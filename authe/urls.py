@@ -1,9 +1,9 @@
 from django.urls import path
-from authe.views import register_view,login_view
+from authe.views import create_user_view,login_view
 from config.urls import schema_view
 
 urlpatterns = [
-    path('register/', register_view),
+    path('create_user/', create_user_view),
     path('login/', login_view)
 ]
 

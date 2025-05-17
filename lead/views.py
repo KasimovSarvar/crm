@@ -104,30 +104,6 @@ def create_lead_view(request):
 
 @swagger_auto_schema(
     method='post',
-    operation_summary="HR yoki SuperUser user yaratishi",
-    request_body=UserSerializer,
-    responses={
-        201: openapi.Response(description="User qoshildi", schema=UserSerializer),
-        400: "Invalid credentials",
-        403: "Permission denied"
-    },
-    tags=["User"]
-)
-@api_view(['POST'])
-def create_user_view(request):
-    role = request.data["role"]
-    if str(role) == "1" or str(role).lower() == "superuser":
-        return Response({"error": "SuperUser yaratomis"}, status=status.HTTP_400_BAD_REQUEST)
-    serializer = UserSerializer(data=request.data)
-    if not serializer.is_valid():
-        return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
-    password = serializer.validated_data["password"]
-    user = serializer.save(password=make_password(password))
-    return Response({"user": UserSerializer(user).data}, status=status.HTTP_201_CREATED)
-
-
-@swagger_auto_schema(
-    method='post',
     operation_summary="HR yoki SuperUser student yaratishi",
     request_body=StudentSerializer,
     responses={

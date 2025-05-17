@@ -1,4 +1,4 @@
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, is_password_usable
 from django.db import models
 from abstraction.base_model import BaseModel
 
@@ -27,7 +27,8 @@ class User(BaseModel):
     login_time = models.DateTimeField(null=True, blank=True, verbose_name='Время входа')
 
     def save(self, *args, **kwargs):
-        self.password = make_password(self.password)
+        if not is_password_usable(self.password):
+            self.password = make_password(self.password)
         super().save(*args, **kwargs)
 
     def __str__(self):
