@@ -11,6 +11,15 @@ from django.contrib.auth.hashers import make_password
 
 
 @swagger_auto_schema(
+    method="get",
+    tags=["User"]
+)
+@api_view(["GET"])
+def me_view(request):
+    return Response(data={"username": request.user.username, "full_name": request.user.full_name, "role": request.user.role}, status=status.HTTP_200_OK)
+
+
+@swagger_auto_schema(
     method='post',
     operation_summary="HR yoki SuperUser user yaratishi",
     request_body=UserSerializer,
@@ -33,7 +42,6 @@ def create_user_view(request):
         return Response({'errors': "user with this username already exists."}, status=status.HTTP_400_BAD_REQUEST)
     password = serializer.validated_data["password"]
     user = serializer.save(password=make_password(password))
-    # return Response({"user": UserSerializer(user).data}, status=status.HTTP_201_CREATED)
     return Response({"message": f"User {user.username} created successfully."}, status=status.HTTP_201_CREATED)
 
 @swagger_auto_schema(
@@ -51,7 +59,6 @@ def login_view(request):
         return Response({"message": "Username and password required"}, status=status.HTTP_400_BAD_REQUEST)
 
     user_model = User.objects.filter(username=username).first()
-    print(user_model)
     if not user_model:
         return Response(data={"Error":"Username not found"},status=status.HTTP_400_BAD_REQUEST)
 

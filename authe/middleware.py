@@ -6,10 +6,10 @@ from .models import User
 ROLE_ACCESS = {
     1: "*",
     2: ['create_lead/', 'create_user/', 'create_student/', 'change_lead_admin/', 'change_student_admin/',
-    'lead_list/', 'student_list/', 'lead_update/', 'student_update/', 'student_detail/',  ],
-    3: ['payment_list/', 'create_payment/', 'update_payment/', 'balance_report/'],
-    4: ['admin_create_student/', 'admin_lead_list/', 'lead_update/', 'create_student/',
-    'my_students_list/', 'student_detail/', ],
+    'lead_list/', 'student_list/', 'lead_update/', 'student_update/', 'student_detail/', 'me/'],
+    3: ['payment_list/', 'create_payment/', 'update_payment/', 'balance_report/', 'me/'],
+    4: ['create_lead/', 'admin_create_student/', 'admin_lead_list/', 'lead_update/', 'admin_create_student/',
+    'my_students_list/', 'student_detail/', 'me/'],
 }
 
 class RoleCheckMiddleware:

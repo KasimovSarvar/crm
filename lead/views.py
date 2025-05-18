@@ -1,11 +1,10 @@
-from django.contrib.auth.hashers import make_password
 from django.db.models import Sum
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from authe.models import User
 from authe.serializers import UserSerializer
-from .serializers import LeadSerializer, StudentSerializer, PaymentSerializer
+from .serializers import LeadSerializer, StudentSerializer, PaymentSerializer, LeadCreateSerializer
 from .models import Outcome, Lead, Student, Payment
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -18,6 +17,10 @@ from drf_yasg import openapi
 )
 @api_view(['GET'])
 def payment_list(request):
+    if request.user.role != 3:
+        payment = Payment.objects.filter(user=request.user)
+        serializer = PaymentSerializer(payment, many=True)
+        return Response(serializer.data)
     payments = Payment.objects.all()
     serializer = PaymentSerializer(payments, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
@@ -84,22 +87,24 @@ def balance_report(request):
 @swagger_auto_schema(
     method='post',
     operation_summary="HR yoki SuperUser lead yaratishi",
-    request_body=LeadSerializer,
+    request_body=LeadCreateSerializer,
     responses={
-        201: openapi.Response(description="Lead qoshildi", schema=LeadSerializer),
+        201: openapi.Response(description="Lead qoshildi", schema=LeadCreateSerializer),
         400: "Invalid credentials",
         403: "Permission denied"
     },
     tags=["Lead"]
 )
 @api_view(['POST'])
-@api_view(['POST'])
 def create_lead_view(request):
-    serializer = LeadSerializer(data=request.data)
+    serializer = LeadCreateSerializer(data=request.data)
     if not serializer.is_valid():
         return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
-    lead = serializer.save(created_by=request.user)
-    return Response({"lead": LeadSerializer(lead).data}, status=status.HTTP_201_CREATED)
+    if request.user.role == 4:
+        lead = serializer.save(created_by=request.user, admin=request.user)
+    if request.user.role in [1, 2]:
+        lead = serializer.save(created_by=request.user, admin=None)
+    return Response({"message": "lead created successfully"}, status=status.HTTP_201_CREATED)
 
 
 @swagger_auto_schema(
@@ -119,7 +124,7 @@ def create_student_view(request):
     if not serializer.is_valid():
         return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
     student = serializer.save(created_by=request.user)
-    return Response({"student": UserSerializer(student).data}, status=status.HTTP_201_CREATED)
+    return Response({"message": "student created successfully"}, status=status.HTTP_201_CREATED)
 
 
 @swagger_auto_schema(
@@ -199,8 +204,8 @@ def change_student_admin_view(request, student_id):
 )
 @api_view(['GET'])
 def lead_list_view(request):
-    if request.user_role == 2:
-        leads = Lead.objects.filter(created_by=request.user_role)
+    if request.user.role != 2:
+        leads = Lead.objects.filter(created_by=request.user)
         serializer = LeadSerializer(leads, many=True)
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 
@@ -220,8 +225,8 @@ def lead_list_view(request):
 )
 @api_view(['GET'])
 def student_list_view(request):
-    if request.user_role == 2:
-        students = Student.objects.filter(admin=request.user_role)
+    if request.user.role != 2:
+        students = Student.objects.filter(admin=request.user)
         serializer = StudentSerializer(students, many=True)
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 
@@ -357,7 +362,7 @@ def student_update_view(request, pk):
         return Response({'message': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
 
     if user.role != 4:
-        return Response({'message': 'You are not Admin'}, status=status.HTTP_403_FORBIDDEN)
+        return Response({'message': 'You are not Admin'}, status=status.HTTP_403_FORBIDDEN) #????
 
     if not student.admin == user:
         return Response({'message': 'You can not update this student'}, status=status.HTTP_403_FORBIDDEN)
