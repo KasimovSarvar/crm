@@ -1,10 +1,13 @@
+from datetime import datetime, date
+from calendar import monthrange
+from django.utils.timezone import now
 from django.db.models import Sum
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from authe.models import User
 from authe.serializers import UserSerializer
-from .serializers import LeadSerializer, StudentSerializer, PaymentSerializer, LeadCreateSerializer
+from .serializers import LeadSerializer, StudentSerializer, PaymentSerializer, LeadCreateSerializer, PaymentCreateSerializer
 from .models import Outcome, Lead, Student, Payment
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -18,7 +21,7 @@ from drf_yasg import openapi
 @api_view(['GET'])
 def payment_list(request):
     if request.user.role != 3:
-        payment = Payment.objects.filter(user=request.user)
+        payment = Payment.objects.filter(student__admin=request.user)
         serializer = PaymentSerializer(payment, many=True)
         return Response(serializer.data)
     payments = Payment.objects.all()
@@ -28,16 +31,16 @@ def payment_list(request):
 
 @swagger_auto_schema(
     method='post',
-    request_body=PaymentSerializer,
-    responses={201: PaymentSerializer},
+    request_body=PaymentCreateSerializer,
+    responses={201: PaymentCreateSerializer},
     tags=["Payment"]
 )
 @api_view(['POST'])
 def create_payment(request):
-    serializer = PaymentSerializer(data=request.data)
+    serializer = PaymentCreateSerializer(data=request.data)
     if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        serializer.save(check_uploader=request.user)
+        return Response({"message": "payment created successfully"}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -57,6 +60,31 @@ def update_payment(request, pk):
         return Response({'error': 'Payment not found'}, status=status.HTTP_404_NOT_FOUND)
     serializer = PaymentSerializer(payment, data=request.data)
     if serializer.is_valid():
+        serializer.save(confirmatory=request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@swagger_auto_schema(
+    method='put',
+    request_body=PaymentCreateSerializer,
+    responses={
+        200: PaymentCreateSerializer,
+        400: "Invalid credentials"
+    },
+    tags=["Payment"]
+)
+@api_view(['PUT'])
+def update_payment_admin(request, pk):
+    payment = Payment.objects.filter(pk=pk, student__admin=request.user).first()
+    if not payment:
+        return Response({"error": "Payment not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    if payment.confirmatory is not None or payment.is_payed == "payed":
+        return Response({"detail": "You cannot update a confirmed or fully paid payment."},status=status.HTTP_400_BAD_REQUEST)
+
+    serializer = PaymentCreateSerializer(payment, data=request.data, partial=True)
+    if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -72,15 +100,47 @@ def update_payment(request, pk):
 )
 @api_view(['GET'])
 def balance_report(request):
-    total_income = Payment.objects.filter(is_payed='payed').aggregate(Sum('amount'))['amount__sum']
-    total_expense = Outcome.objects.aggregate(Sum('amount'))['amount__sum']
-    balance = total_income - total_expense
+    start = request.GET.get('start_date')
+    end = request.GET.get('end_date')
+
+    if not start or not end:
+        today = now().date()
+        year, month = today.year, today.month
+        start_date = date(year, month, 1)
+        end_day = monthrange(year, month)[1]
+        end_date = date(year, month, end_day)
+    else:
+        start_date = datetime.strptime(start, "%Y-%m-%d").date()
+        end_date = datetime.strptime(end, "%Y-%m-%d").date()
+
+    incomes = Payment.objects.filter(
+        is_payed='payed',
+        created_at__date__range=(start_date, end_date)
+    )
+    expenses = Outcome.objects.filter(
+        created_at__date__range=(start_date, end_date)
+    )
+
+    total_income = incomes.aggregate(Sum('amount'))['amount__sum'] or 0
+    total_expense = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
 
     return Response({
         'total_income': total_income,
         'total_expense': total_expense,
-        'balance': balance
+        'balance': total_income - total_expense
     }, status=status.HTTP_200_OK)
+
+# @api_view(['GET'])
+# def balance_report(request):
+#     total_income = Payment.objects.filter(is_payed='payed').aggregate(Sum('amount'))['amount__sum']
+#     total_expense = Outcome.objects.aggregate(Sum('amount'))['amount__sum']
+#     balance = total_income - total_expense
+#
+#     return Response({
+#         'total_income': total_income,
+#         'total_expense': total_expense,
+#         'balance': balance
+#     }, status=status.HTTP_200_OK)
 
 
 # HR

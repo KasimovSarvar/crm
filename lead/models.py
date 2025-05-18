@@ -208,7 +208,7 @@ class Payment(BaseModel):
     type = models.IntegerField(default=3, choices=TYPE_PAYMENT, verbose_name='Способ оплаты')
     uploader_amount = models.FloatField(default=0)
     amount = models.FloatField(verbose_name='Сумма')
-    check_file = models.FileField(upload_to='checks', verbose_name='Чек')
+    check_file = models.FileField(upload_to='checks', verbose_name='Чек', blank=True, null=True)
     is_payed = models.CharField(max_length=100, default='pending', choices=PAYMENT_STATUS_CHOICES,
                                 verbose_name='Оплачено')
     comment = models.CharField(max_length=500, verbose_name='Коментарий')
