@@ -13,9 +13,15 @@ class CategoryOutlaySerializer(ModelSerializer):
         model = CategoryOutlay
         fields = ('id', 'name', 'limit')
 
+class PaymentCreateSerializer(ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = ('id', 'student', 'type', 'uploader_amount', 'amount', 'check_file', 'comment')
+
 class PaymentSerializer(ModelSerializer):
     class Meta:
         model = Payment
+        read_only_fields = ['check_uploader', 'confirmatory']
         fields = ('id', 'student', 'check_uploader', 'confirmatory', 'type', 'uploader_amount', 'amount', 'check_file', 'is_payed', 'comment')
 
 class StudentSerializer(ModelSerializer):
