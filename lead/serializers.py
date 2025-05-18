@@ -54,8 +54,13 @@ class CommentSerializer(ModelSerializer):
         model = Comment
         fields = ('id', 'admin','lead', 'comment', 'lead_status')
 
+class LeadCreateSerializer(ModelSerializer):
+    class Meta:
+        model = Lead
+        fields = ('id', 'first_name', 'last_name', 'phone_number')
+
 class LeadSerializer(ModelSerializer):
+    is_checked = serializers.BooleanField(default=False)
     class Meta:
         model = Lead
         fields = ('id', 'admin', 'first_name', 'last_name', 'passport_series', 'phone_number', 'status', 'type', 'is_checked', 'is_signing_at')
-        read_only_fields = ['created_by']
