@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from authe.models import User
 from authe.serializers import UserSerializer
-from .serializers import LeadSerializer, StudentSerializer, PaymentSerializer, LeadCreateSerializer, PaymentCreateSerializer
+from .serializers import LeadSerializer, StudentSerializer, PaymentSerializer, LeadCreateSerializer, PaymentCreateSerializer, CommentSerializer
 from .models import Outcome, Lead, Student, Payment
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -332,8 +332,8 @@ def admin_lead_view(request):
     tags=["Lead"]
 )
 @api_view(['PUT'])
-def lead_update_view(request, lead_id):
-    lead = Lead.objects.filter(id=lead_id).first()
+def lead_update_view(request, pk):
+    lead = Lead.objects.filter(id=pk).first()
     
     if not lead:
         return Response({'message': 'Lead not found'}, status=status.HTTP_404_NOT_FOUND)
@@ -367,11 +367,8 @@ def lead_update_view(request, lead_id):
     tags=["Student"]
 )
 @api_view(['POST'])
-def create_student(request):
-    lead_id = request.data.get("lead")
-    if not lead_id:
-        return Response({'message': 'Lead id not found'}, status=400)
-
+def create_student(request, lead_id):
+   
     lead = Lead.objects.filter(id=lead_id).first()
     if not lead:
         return Response({'message': 'Lead not found'}, status=404)
@@ -467,3 +464,32 @@ def student_detail(request, id):
 
     serializer = StudentSerializer(student)
     return Response(serializer.data)
+
+@swagger_auto_schema(
+    method='post',
+    operation_summary="Leadga comment qoshish",
+    request_body=LeadSerializer,
+    responses={
+        200: openapi.Response("Comment qo'shildi", LeadSerializer()),
+        400: "Not authenticated or validation error",
+        403: "Access denied",
+        404: "Lead not found"
+    },
+    tags=["Lead"]
+)
+
+@api_view(['POST'])
+def add_comment_view(request, pk):
+    lead = Lead.objects.filter(id=pk).first()
+    if not lead:
+        return Response({'message': 'Lead not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.user.role == 4:
+        return Response({'message': 'this lead not for you'}, status=status.HTTP_403_FORBIDDEN)
+    
+    serializer = CommentSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save(admin=request.user, lead=lead)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+     
