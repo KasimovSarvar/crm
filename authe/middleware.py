@@ -3,7 +3,7 @@ import jwt
 from django.conf import settings
 from .models import User
 
-class RoleCheckMiddleware:
+class AuthorizationMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
