@@ -8,6 +8,7 @@ from rest_framework.decorators import api_view
 from authe.models import User
 from authe.serializers import UserSerializer
 from .serializers import LeadSerializer, StudentSerializer, PaymentSerializer, LeadCreateSerializer, PaymentCreateSerializer, CommentSerializer
+from .serializers import StudentSerializer, PaymentSerializer, LeadSerializer, PaymentCreateSerializer
 from .models import Outcome, Lead, Student, Payment
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -147,9 +148,9 @@ def balance_report(request):
 @swagger_auto_schema(
     method='post',
     operation_summary="HR yoki SuperUser lead yaratishi",
-    request_body=LeadCreateSerializer,
+    request_body=LeadSerializer,
     responses={
-        201: openapi.Response(description="Lead qoshildi", schema=LeadCreateSerializer),
+        201: openapi.Response(description="Lead qoshildi", schema=LeadSerializer),
         400: "Invalid credentials",
         403: "Permission denied"
     },
@@ -157,7 +158,7 @@ def balance_report(request):
 )
 @api_view(['POST'])
 def create_lead_view(request):
-    serializer = LeadCreateSerializer(data=request.data)
+    serializer = LeadSerializer(data=request.data)
     if not serializer.is_valid():
         return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
     if request.user.role == 4:
@@ -183,7 +184,10 @@ def create_student_view(request):
     serializer = StudentSerializer(data=request.data)
     if not serializer.is_valid():
         return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
-    student = serializer.save(created_by=request.user)
+    if request.user.role == 4:
+        student = serializer.save(created_by=request.user, admin=request.user)
+    if request.user.role in [1, 2]:
+        student = serializer.save(created_by=request.user, admin=None)
     return Response({"message": "student created successfully"}, status=status.HTTP_201_CREATED)
 
 
@@ -354,6 +358,7 @@ def lead_update_view(request, pk):
     return Response({'message': 'You are not Admin'}, status=status.HTTP_403_FORBIDDEN)
 
 
+
 @swagger_auto_schema(
     method='post',
     operation_summary="Yangi student yaratish",
@@ -400,6 +405,38 @@ def my_students_list_view(request):
         serializer = StudentSerializer(student, many=True)
         return Response({'message': 'success'}, serializer.data)
     return Response({'message': 'You are not Admin'}, status=status.HTTP_403_FORBIDDEN)
+
+# @swagger_auto_schema(
+#     method='post',
+#     operation_summary="Yangi student yaratish",
+#     request_body=StudentSerializer,
+#     responses={
+#         201: openapi.Response("Yaratilgan student ma'lumotlari", StudentSerializer()),
+#         400: "Not authenticated or validation error",
+#         403: "Access denied",
+#         404: "Lead not found"
+#     },
+#     tags=["Student"]
+# )
+# @api_view(['POST'])
+# def create_student(request):
+#     lead_id = request.data.get("lead")
+#     if not lead_id:
+#         return Response({'message': 'Lead id not found'}, status=400)
+#
+#     lead = Lead.objects.filter(id=lead_id).first()
+#     if not lead:
+#         return Response({'message': 'Lead not found'}, status=404)
+#
+#     if request.user.role == 4 and lead.admin != request.user:
+#         return Response({'message': 'this lead not for you'}, status=403)
+#
+#     serializer = StudentSerializer(data=request.data)
+#     if serializer.is_valid():
+#         serializer.save(created_by=request.user, admin=request.user)
+#         return Response(serializer.data, status=201)
+#     return Response(serializer.errors, status=400)
+
 
 
 @swagger_auto_schema(
