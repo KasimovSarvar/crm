@@ -7,8 +7,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from authe.models import User
 from authe.serializers import UserSerializer
-from .serializers import LeadSerializer, StudentSerializer, PaymentSerializer, LeadCreateSerializer, PaymentCreateSerializer, CommentSerializer
-from .serializers import StudentSerializer, PaymentSerializer, LeadSerializer, PaymentCreateSerializer
+from .serializers import LeadSerializer, StudentSerializer, PaymentSerializer, LeadCreateSerializer, PaymentCreateSerializer
 from .models import Outcome, Lead, Student, Payment
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -358,54 +357,6 @@ def lead_update_view(request, pk):
     return Response({'message': 'You are not Admin'}, status=status.HTTP_403_FORBIDDEN)
 
 
-
-@swagger_auto_schema(
-    method='post',
-    operation_summary="Yangi student yaratish",
-    request_body=StudentSerializer,
-    responses={
-        201: openapi.Response("Yaratilgan student ma'lumotlari", StudentSerializer()),
-        400: "Not authenticated or validation error",
-        403: "Access denied",
-        404: "Lead not found"
-    },
-    tags=["Student"]
-)
-@api_view(['POST'])
-def create_student(request, lead_id):
-   
-    lead = Lead.objects.filter(id=lead_id).first()
-    if not lead:
-        return Response({'message': 'Lead not found'}, status=404)
-
-    if request.user.role == 4 and lead.admin != request.user:
-        return Response({'message': 'this lead not for you'}, status=403)
-
-    serializer = StudentSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=201)
-    return Response(serializer.errors, status=400)
-
-
-@swagger_auto_schema(
-    method='get',
-    operation_summary="Adminning studentlar ro'yxati",
-    responses={
-        200: openapi.Response("Studentlar ro'yxati", StudentSerializer(many=True)),
-        400: "Not authenticated",
-        403: "Access denied"
-    },
-    tags=["Student"]
-)
-@api_view(['GET'])
-def my_students_list_view(request):
-    if request.user.role == 4:
-        student = Student.objects.filter(admin=request.user)
-        serializer = StudentSerializer(student, many=True)
-        return Response({'message': 'success'}, serializer.data)
-    return Response({'message': 'You are not Admin'}, status=status.HTTP_403_FORBIDDEN)
-
 # @swagger_auto_schema(
 #     method='post',
 #     operation_summary="Yangi student yaratish",
@@ -436,7 +387,6 @@ def my_students_list_view(request):
 #         serializer.save(created_by=request.user, admin=request.user)
 #         return Response(serializer.data, status=201)
 #     return Response(serializer.errors, status=400)
-
 
 
 @swagger_auto_schema(
