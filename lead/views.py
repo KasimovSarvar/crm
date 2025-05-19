@@ -153,9 +153,9 @@ def balance_report(request):
 @swagger_auto_schema(
     method='post',
     operation_summary="HR yoki SuperUser lead yaratishi",
-    request_body=LeadCreateSerializer,
+    request_body=LeadSerializer,
     responses={
-        201: openapi.Response(description="Lead qoshildi", schema=LeadCreateSerializer),
+        201: openapi.Response(description="Lead qoshildi", schema=LeadSerializer),
         400: "Invalid credentials",
         403: "Permission denied"
     },
@@ -163,7 +163,7 @@ def balance_report(request):
 )
 @api_view(['POST'])
 def create_lead_view(request):
-    serializer = LeadCreateSerializer(data=request.data)
+    serializer = LeadSerializer(data=request.data)
     if not serializer.is_valid():
         return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
     if request.user.role == 4:
