@@ -334,14 +334,22 @@ def admin_lead_view(request):
 @api_view(['PUT'])
 def lead_update_view(request, lead_id):
     lead = Lead.objects.filter(id=lead_id).first()
+    
     if not lead:
         return Response({'message': 'Lead not found'}, status=status.HTTP_404_NOT_FOUND)
+   
+    is_student = Student.objects.filter(passport_series=lead.passport_series).exists()
 
     if request.user.role == 4:
+        if lead.status == 'canceled':
+            return Response({'message': 'You con not update ->  Canceled lead..!' }, status=status.HTTP_400_BAD_REQUEST)
+        if is_student:
+            return Response({'message': 'if this lead already has student -> you can not update'}, status=status.HTTP_400_BAD_REQUEST)
+  
         serializer = LeadSerializer(lead, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response({'message': 'success! update this lead'}, serializer.data, status=status.HTTP_200_OK)
+            return Response({'message': 'success!!! update this lead', 'data': serializer.data}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     return Response({'message': 'You are not Admin'}, status=status.HTTP_403_FORBIDDEN)
 
