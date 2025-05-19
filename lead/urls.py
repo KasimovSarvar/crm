@@ -20,6 +20,5 @@ urlpatterns = [
     path('payment_list/', payment_list, name='payment-list'),
     path('create_payment/', create_payment, name='create-payment'),
     path('update_payment/<int:pk>/', update_payment, name='update-payment'),
-    path('update_payment_admin/<int:pk>/', update_payment_admin, name='update-payment'),
     path('balance_report/', balance_report, name='balance-report'),
 ]

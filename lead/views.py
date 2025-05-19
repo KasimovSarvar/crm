@@ -5,12 +5,26 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from authe.models import User
 from authe.serializers import UserSerializer
-from .serializers import LeadSerializer, StudentSerializer, PaymentSerializer
+from .serializers import LeadSerializer, StudentSerializer, PaymentSerializer,PaymentCreateSerializer
 from .models import Outcome, Lead, Student, Payment
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
+@api_view(['PUT'])
+def update_payment_admin(request, pk):
+    payment = Payment.objects.filter(pk=pk, student__admin=request.user).first()
+    if not payment:
+        return Response({"error": "Payment not found."}, status=status.HTTP_404_NOT_FOUND)
 
+    if payment.confirmatory is not None or payment.is_payed == "payed":
+        return Response({"detail": "You cannot update a confirmed or fully paid payment."},status=status.HTTP_400_BAD_REQUEST)
+
+    serializer = PaymentCreateSerializer(payment, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 @swagger_auto_schema(
     method='get',
     responses={200: PaymentSerializer(many=True)},
