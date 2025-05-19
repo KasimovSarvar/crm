@@ -1,8 +1,8 @@
 from django.urls import path
 from .views import payment_list, create_payment, update_payment, balance_report, create_lead_view, \
     change_lead_admin_view, change_student_admin_view, lead_list_view, \
-    student_list_view, admin_lead_view, lead_update_view, create_student_view, my_students_list_view, \
-    student_update_view, student_detail, create_student, update_payment_admin
+    student_list_view, admin_lead_view, lead_update_view, create_student_view, \
+    student_update_view, student_detail, update_payment_admin
 
 urlpatterns = [
     path('create_lead/', create_lead_view, name='create-lead'),
@@ -13,8 +13,7 @@ urlpatterns = [
     path('student_list/', student_list_view, name='student-list'),
     path('admin_lead_list/<int:pk>/', admin_lead_view, name='admin-lead-list'),
     path('lead_update/<int:pk>/', lead_update_view, name='lead-update'),
-    path('admin_create_student/', create_student, name='create-student'),
-    path('my_students_list/', my_students_list_view, name='my-students-list'),
+    # path('admin_create_student/', create_student, name='create-student'),
     path('student_update/<int:pk>/', student_update_view, name='student-update'),
     path('student_detail/<int:pk>/', student_detail, name='student-detail'),
     path('payment_list/', payment_list, name='payment-list'),
