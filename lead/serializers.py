@@ -28,7 +28,7 @@ class StudentSerializer(ModelSerializer):
     class Meta:
         model = Student
         fields = ('id', 'admin', 'state', 'university', 'season', 'education_type', 'faculty', 'study_format', 'first_name', 'last_name', 'phone_number', 'passport_series')
-        read_only_fields = ['created_by']
+        read_only_fields = ['created_by', 'admin']
 
 class SeasonFacultyLimitSerializer(ModelSerializer):
     class Meta:

@@ -9,7 +9,7 @@ ROLE_ACCESS = {
     'lead_list/', 'student_list/', 'lead_update/', 'student_update/', 'student_detail/', 'me/'],
     3: ['payment_list/', 'create_payment/', 'update_payment/', 'balance_report/', 'me/'],
     4: ['create_lead/', 'admin_create_student/', 'admin_lead_list/', 'lead_update/', 'admin_create_student/',
-    'my_students_list/', 'student_detail/', 'update_payment_admin/', 'payment_list/', 'create_payment/', 'me/'],
+        'student_detail/', 'update_payment_admin/', 'payment_list/', 'create_payment/', 'me/'],
 }
 
 class RoleCheckMiddleware:
