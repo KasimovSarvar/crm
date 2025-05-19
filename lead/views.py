@@ -92,7 +92,7 @@ def balance_report(request):
     },
     tags=["Lead"]
 )
-
+@api_view(['POST'])
 @api_view(['POST'])
 def create_lead_view(request):
     serializer = LeadSerializer(data=request.data)
@@ -224,7 +224,7 @@ def change_student_admin_view(request, student_id):
 @api_view(['GET'])
 def lead_list_view(request):
     if request.user_role == 2:
-        leads = Lead.objects.filter(created_by=request.user)
+        leads = Lead.objects.filter(created_by=request.user_role)
         serializer = LeadSerializer(leads, many=True)
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 

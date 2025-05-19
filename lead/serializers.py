@@ -13,9 +13,15 @@ class CategoryOutlaySerializer(ModelSerializer):
         model = CategoryOutlay
         fields = ('id', 'name', 'limit')
 
+class PaymentCreateSerializer(ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = ('id', 'student', 'type', 'uploader_amount', 'amount', 'check_file', 'comment')
+
 class PaymentSerializer(ModelSerializer):
     class Meta:
         model = Payment
+        read_only_fields = ['check_uploader', 'confirmatory']
         fields = ('id', 'student', 'check_uploader', 'confirmatory', 'type', 'uploader_amount', 'amount', 'check_file', 'is_payed', 'comment')
 
 class StudentSerializer(ModelSerializer):
@@ -54,8 +60,13 @@ class CommentSerializer(ModelSerializer):
         model = Comment
         fields = ('id', 'admin','lead', 'comment', 'lead_status')
 
+class LeadCreateSerializer(ModelSerializer):
+    class Meta:
+        model = Lead
+        fields = ('id', 'first_name', 'last_name', 'phone_number')
+
 class LeadSerializer(ModelSerializer):
+    is_checked = serializers.BooleanField(default=False)
     class Meta:
         model = Lead
         fields = ('id', 'admin', 'first_name', 'last_name', 'passport_series', 'phone_number', 'status', 'type', 'is_checked', 'is_signing_at')
-        read_only_fields = ['created_by']

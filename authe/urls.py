@@ -1,14 +1,10 @@
 from django.urls import path
-from authe.views import register_view,login_view,me_view
+from authe.views import register_view,login_view
 from config.urls import schema_view
 
-
 urlpatterns = [
-    path('register/', register_view,name='register'),
-    path('login/', login_view),
-    path('me/',me_view),
-
-
+    path('register/', register_view),
+    path('login/', login_view)
 ]
 
 path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
