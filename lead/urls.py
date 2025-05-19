@@ -2,7 +2,7 @@ from django.urls import path
 from .views import payment_list, create_payment, update_payment, balance_report, create_lead_view, \
     change_lead_admin_view, change_student_admin_view, lead_list_view, \
     student_list_view, admin_lead_view, lead_update_view, create_student_view, my_students_list_view, \
-    student_update_view, student_detail, create_student, update_payment_admin,  add_comment_view
+    student_update_view, student_detail, create_student, update_payment_admin,  add_comment_view,\
     student_list_view, admin_lead_view, lead_update_view, create_student_view, \
     student_update_view, student_detail, update_payment_admin
 
