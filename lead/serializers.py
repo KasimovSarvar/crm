@@ -67,3 +67,8 @@ class LeadSerializer(ModelSerializer):
         model = Lead
         fields = ('id', 'admin', 'first_name', 'last_name', 'passport_series', 'phone_number', 'status', 'type', 'is_checked', 'is_signing_at')
         read_only_fields = ['id', 'admin']
+
+class LeadCreateSerializer(ModelSerializer):
+    class Meta:
+        model = Lead
+        fields = ('id', 'first_name', 'last_name', 'phone_number')
