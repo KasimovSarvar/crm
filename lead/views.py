@@ -12,7 +12,7 @@ from drf_yasg import openapi
 
 @api_view(['PUT'])
 def update_payment_admin(request, pk):
-    payment = Payment.objects.filter(pk=pk, student__admin=request.user).first()
+    payment = Payment.objects.filter(id=pk, student__admin=request.user).first()
     if not payment:
         return Response({"error": "Payment not found."}, status=status.HTTP_404_NOT_FOUND)
 

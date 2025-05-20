@@ -46,7 +46,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
   
     'authe.middleware.RoleCheckMiddleware',
-    # "authe.tests.SimpleTest"
+    'lead.middleware.BasicMiddleware',
 
 ]
 
