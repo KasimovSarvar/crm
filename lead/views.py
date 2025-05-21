@@ -46,7 +46,7 @@ def create_payment(request):
 
 
 @swagger_auto_schema(
-    method='put',
+    method='PATCH',
     request_body=PaymentSerializer,
     responses={
         200: PaymentSerializer,
@@ -54,7 +54,7 @@ def create_payment(request):
     },
     tags=["Payment"]
 )
-@api_view(['PUT'])
+@api_view(['PATCH'])
 def update_payment(request, pk):
     payment = Payment.objects.filter(id=pk).first()
     if not payment:
@@ -67,7 +67,7 @@ def update_payment(request, pk):
 
 
 @swagger_auto_schema(
-    method='put',
+    method='PATCH',
     request_body=PaymentCreateSerializer,
     responses={
         200: PaymentCreateSerializer,
@@ -75,14 +75,19 @@ def update_payment(request, pk):
     },
     tags=["Payment"]
 )
-@api_view(['PUT'])
-def update_payment_admin(request, pk):
-    payment = Payment.objects.filter(pk=pk, student__admin=request.user).first()
+@api_view(['PATCH'])
+def update_payment_admin(request, student_id, payment_id):
+    payment = Payment.objects.filter(student__id=student_id, id=payment_id, student__admin=request.user).first()
+    print(payment)
+
     if not payment:
         return Response({"error": "Payment not found."}, status=status.HTTP_404_NOT_FOUND)
 
     if payment.confirmatory is not None or payment.is_payed == "payed":
-        return Response({"detail": "You cannot update a confirmed or fully paid payment."},status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"detail": "You cannot update a confirmed or fully paid payment."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     serializer = PaymentCreateSerializer(payment, data=request.data, partial=True)
     if serializer.is_valid():

@@ -22,7 +22,7 @@ urlpatterns = [
     path('payment_list/', payment_list, name='payment-list'),
     path('create_payment/', create_payment, name='create-payment'),
     path('update_payment/<int:pk>/', update_payment, name='update-payment'),
-    path('update_payment_admin/<int:pk>/', update_payment_admin, name='update-payment'),
+    path('student/<int:student_id>/payment/<int:payment_id>/update/', update_payment_admin, name='update-payment-admin'),
     path('balance_report/', balance_report, name='balance-report'),
     path('add_comment/<int:lead_id>/', add_comment_view, name='add-comment'),
 ]

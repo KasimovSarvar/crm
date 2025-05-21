@@ -27,7 +27,7 @@ class User(BaseModel):
     login_time = models.DateTimeField(null=True, blank=True, verbose_name='Время входа')
 
     def save(self, *args, **kwargs):
-        if not is_password_usable(self.password):
+        if not self.password.startswith('pbkdf2_'):
             self.password = make_password(self.password)
         super().save(*args, **kwargs)
 
