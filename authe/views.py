@@ -1,3 +1,4 @@
+from django.utils.timezone import now
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -65,6 +66,8 @@ def login_view(request):
     if not check_password(password,user_model.password):
         return Response(data={"Error":"Wrong password"},status=status.HTTP_400_BAD_REQUEST)
 
+    user_model.login_time = now()
+    user_model.save(update_fields=['login_time'])
 
     refresh_token = RefreshToken.for_user(user_model)
     access_token = refresh_token.access_token
