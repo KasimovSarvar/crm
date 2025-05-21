@@ -24,5 +24,5 @@ urlpatterns = [
     path('update_payment/<int:pk>/', update_payment, name='update-payment'),
     path('student/<int:student_id>/payment/<int:payment_id>/update/', update_payment_admin, name='update-payment-admin'),
     path('balance_report/', balance_report, name='balance-report'),
-    path('add_comment/<int:lead_id>/', add_comment_view, name='add-comment'),
+    path('add_comment/<int:pk>/', add_comment_view, name='add-comment'),
 ]

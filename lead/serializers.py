@@ -59,6 +59,7 @@ class StateSerializer(ModelSerializer):
 class CommentSerializer(ModelSerializer):
     class Meta:
         model = Comment
+        read_only_fields = ['lead']
         fields = ('id', 'admin','lead', 'comment', 'lead_status')
 
 class LeadSerializer(ModelSerializer):
