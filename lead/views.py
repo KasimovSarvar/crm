@@ -231,6 +231,49 @@ def change_lead_admin_view(request, lead_id):
 
 @swagger_auto_schema(
     method='put',
+    operation_summary="HR yoki SuperUser leadlarni adminini ozgartirishi",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'new_admin_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+            "leads": openapi.Schema(
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER)
+            ),
+        }
+    ),
+    responses={
+        200: "Leadlar yengi adminga ozgartirildi",
+        400: "New_admin_id majburiy yoki noto'g'ri lead_ids",
+        404: "New_admin_id boyicha admin yoki leadlar topilmadi"
+    },
+    tags=["Lead"]
+)
+@api_view(['PUT'])
+def change_leads_admin_view(request):
+    lead_ids = request.data.get("leads")
+    new_admin_id = request.data.get("new_admin_id")
+
+    if not new_admin_id:
+        return Response({'message': 'New_admin_id majburiy'}, status=status.HTTP_400_BAD_REQUEST)
+
+    new_admin = User.objects.filter(id=new_admin_id, role=4).first()
+    if not new_admin:
+        return Response({'message': 'New_admin_id boyicha admin topilmadi'}, status=status.HTTP_404_NOT_FOUND)
+
+    leads = Lead.objects.filter(id__in=lead_ids)
+    if not leads.exists():
+        return Response({'message': 'Berilgan idlar boyicha leadlar yoq'}, status=status.HTTP_404_NOT_FOUND)
+
+    leads.update(admin=new_admin)
+
+    return Response({'message': 'Leadlar yengi adminga ozgartirildi'}, status=status.HTTP_200_OK)
+
+
+
+
+@swagger_auto_schema(
+    method='put',
     operation_summary="HR yoki SuperAdmin student admin ozgartirishi",
     request_body=openapi.Schema(type=openapi.TYPE_OBJECT, properties={
         'admin_id': openapi.Schema(type=openapi.TYPE_INTEGER)
