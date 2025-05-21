@@ -21,7 +21,7 @@ from drf_yasg import openapi
 )
 @api_view(['GET'])
 def payment_list(request):
-    if request.user.role != 3:
+    if request.user.role == 4:
         payment = Payment.objects.filter(student__admin=request.user)
         serializer = PaymentSerializer(payment, many=True)
         return Response(serializer.data)
@@ -167,9 +167,9 @@ def create_lead_view(request):
     if not serializer.is_valid():
         return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
     if request.user.role == 4:
-        lead = serializer.save(created_by=request.user, admin=request.user)
+        serializer.save(created_by=request.user, admin=request.user)
     if request.user.role in [1, 2]:
-        lead = serializer.save(created_by=request.user, admin=None)
+        serializer.save(created_by=request.user, admin=None)
     return Response({"message": "lead created successfully"}, status=status.HTTP_201_CREATED)
 
 
@@ -436,9 +436,9 @@ def student_detail(request, pk):
 @swagger_auto_schema(
     method='post',
     operation_summary="Leadga comment qoshish",
-    request_body=LeadSerializer,
+    request_body=CommentSerializer,
     responses={
-        200: openapi.Response("Comment qo'shildi", LeadSerializer()),
+        200: openapi.Response("Comment qo'shildi", CommentSerializer),
         400: "Not authenticated or validation error",
         403: "Access denied",
         404: "Lead not found"
@@ -452,7 +452,7 @@ def add_comment_view(request, pk):
     if not lead:
         return Response({'message': 'Lead not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    if request.user.role == 4:
+    if request.user.role != 4:
         return Response({'message': 'this lead not for you'}, status=status.HTTP_403_FORBIDDEN)
     
     serializer = CommentSerializer(data=request.data)
