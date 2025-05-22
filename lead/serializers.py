@@ -21,7 +21,7 @@ class PaymentCreateSerializer(ModelSerializer):
 class PaymentSerializer(ModelSerializer):
     class Meta:
         model = Payment
-        read_only_fields = ['check_uploader', 'confirmatory']
+        read_only_fields = ['id', 'student', 'check_uploader', 'confirmatory', 'type', 'uploader_amount', 'amount', 'check_file', 'comment']
         fields = ('id', 'student', 'check_uploader', 'confirmatory', 'type', 'uploader_amount', 'amount', 'check_file', 'is_payed', 'comment')
 
 class StudentSerializer(ModelSerializer):
@@ -59,6 +59,7 @@ class StateSerializer(ModelSerializer):
 class CommentSerializer(ModelSerializer):
     class Meta:
         model = Comment
+        read_only_fields = ['lead']
         fields = ('id', 'admin','lead', 'comment', 'lead_status')
 
 class LeadSerializer(ModelSerializer):

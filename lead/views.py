@@ -21,7 +21,7 @@ from drf_yasg import openapi
 )
 @api_view(['GET'])
 def payment_list(request):
-    if request.user.role != 3:
+    if request.user.role == 4:
         payment = Payment.objects.filter(student__admin=request.user)
         serializer = PaymentSerializer(payment, many=True)
         return Response(serializer.data)
@@ -46,7 +46,7 @@ def create_payment(request):
 
 
 @swagger_auto_schema(
-    method='put',
+    method='PATCH',
     request_body=PaymentSerializer,
     responses={
         200: PaymentSerializer,
@@ -54,7 +54,7 @@ def create_payment(request):
     },
     tags=["Payment"]
 )
-@api_view(['PUT'])
+@api_view(['PATCH'])
 def update_payment(request, pk):
     payment = Payment.objects.filter(id=pk).first()
     if not payment:
@@ -67,7 +67,7 @@ def update_payment(request, pk):
 
 
 @swagger_auto_schema(
-    method='put',
+    method='PATCH',
     request_body=PaymentCreateSerializer,
     responses={
         200: PaymentCreateSerializer,
@@ -75,14 +75,19 @@ def update_payment(request, pk):
     },
     tags=["Payment"]
 )
-@api_view(['PUT'])
-def update_payment_admin(request, pk):
-    payment = Payment.objects.filter(pk=pk, student__admin=request.user).first()
+@api_view(['PATCH'])
+def update_payment_admin(request, student_id, payment_id):
+    payment = Payment.objects.filter(student__id=student_id, id=payment_id, student__admin=request.user).first()
+    print(payment)
+
     if not payment:
         return Response({"error": "Payment not found."}, status=status.HTTP_404_NOT_FOUND)
 
     if payment.confirmatory is not None or payment.is_payed == "payed":
-        return Response({"detail": "You cannot update a confirmed or fully paid payment."},status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"detail": "You cannot update a confirmed or fully paid payment."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     serializer = PaymentCreateSerializer(payment, data=request.data, partial=True)
     if serializer.is_valid():
@@ -162,9 +167,9 @@ def create_lead_view(request):
     if not serializer.is_valid():
         return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
     if request.user.role == 4:
-        lead = serializer.save(created_by=request.user, admin=request.user)
+        serializer.save(created_by=request.user, admin=request.user)
     if request.user.role in [1, 2]:
-        lead = serializer.save(created_by=request.user, admin=None)
+        serializer.save(created_by=request.user, admin=None)
     return Response({"message": "lead created successfully"}, status=status.HTTP_201_CREATED)
 
 
@@ -226,6 +231,49 @@ def change_lead_admin_view(request, lead_id):
 
 @swagger_auto_schema(
     method='put',
+    operation_summary="HR yoki SuperUser leadlarni adminini ozgartirishi",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'new_admin_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+            "leads": openapi.Schema(
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER)
+            ),
+        }
+    ),
+    responses={
+        200: "Leadlar yengi adminga ozgartirildi",
+        400: "New_admin_id majburiy yoki noto'g'ri leads",
+        404: "New_admin_id boyicha admin yoki leadlar topilmadi"
+    },
+    tags=["Lead"]
+)
+@api_view(['PUT'])
+def change_leads_admin_view(request):
+    lead_ids = request.data.get("leads")
+    new_admin_id = request.data.get("new_admin_id")
+
+    if not new_admin_id:
+        return Response({'message': 'New_admin_id majburiy'}, status=status.HTTP_400_BAD_REQUEST)
+
+    new_admin = User.objects.filter(id=new_admin_id, role=4).first()
+    if not new_admin:
+        return Response({'message': 'New_admin_id boyicha admin topilmadi'}, status=status.HTTP_404_NOT_FOUND)
+
+    leads = Lead.objects.filter(id__in=lead_ids)
+    if not leads.exists():
+        return Response({'message': 'Berilgan idlar boyicha leadlar yoq'}, status=status.HTTP_404_NOT_FOUND)
+
+    leads.update(admin=new_admin)
+
+    return Response({'message': 'Leadlar yengi adminga ozgartirildi'}, status=status.HTTP_200_OK)
+
+
+
+
+@swagger_auto_schema(
+    method='put',
     operation_summary="HR yoki SuperAdmin student admin ozgartirishi",
     request_body=openapi.Schema(type=openapi.TYPE_OBJECT, properties={
         'admin_id': openapi.Schema(type=openapi.TYPE_INTEGER)
@@ -258,8 +306,48 @@ def change_student_admin_view(request, student_id):
 
 
 @swagger_auto_schema(
+    method='put',
+    operation_summary="HR yoki SuperUser studentlarni adminini ozgartirishi",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'new_admin_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+            "students": openapi.Schema(
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER)
+            ),
+        }
+    ),
+    responses={
+        200: "Studentlar yengi adminga ozgartirildi",
+        400: "New_admin_id majburiy yoki",
+        404: "New_admin_id boyicha admin yoki studentlar topilmadi"
+    },
+    tags=["Student"]
+)
+@api_view(['PUT'])
+def change_students_admin_view(request):
+    students = request.data.get("students")
+    new_admin_id = request.data.get("new_admin_id")
+
+    if not new_admin_id:
+        return Response({'message': 'New_admin_id majburiy'}, status=status.HTTP_400_BAD_REQUEST)
+
+    new_admin = User.objects.filter(id=new_admin_id, role=4).first()
+    if not new_admin:
+        return Response({'message': 'New_admin_id boyicha admin topilmadi'}, status=status.HTTP_404_NOT_FOUND)
+
+    all_students = Student.objects.filter(id__in=students)
+    if not all_students.exists():
+        return Response({'message': 'Berilgan idlar boyicha studentlar yoq'}, status=status.HTTP_404_NOT_FOUND)
+
+    all_students.update(admin=new_admin)
+    return Response({'message': 'Studentlar yengi adminga ozgartirildi'}, status=status.HTTP_200_OK)
+
+
+@swagger_auto_schema(
     method='get',
-    operation_summary="HR ozi yaratgan leadlarini korishi",
+    operation_summary="HR hamma admin esa ozi yaratgan leadlarini korishi",
     responses={
         200: openapi.Response(description="Leadlari", schema=LeadSerializer(many=True)),
         403: "Permission denied"
@@ -268,8 +356,8 @@ def change_student_admin_view(request, student_id):
 )
 @api_view(['GET'])
 def lead_list_view(request):
-    if request.user.role != 2:
-        leads = Lead.objects.filter(created_by=request.user)
+    if request.user.role == 4:
+        leads = Lead.objects.filter(admin=request.user)
         serializer = LeadSerializer(leads, many=True)
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 
@@ -289,7 +377,7 @@ def lead_list_view(request):
 )
 @api_view(['GET'])
 def student_list_view(request):
-    if request.user.role != 2:
+    if request.user.role == 4:
         students = Student.objects.filter(admin=request.user)
         serializer = StudentSerializer(students, many=True)
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
@@ -297,27 +385,7 @@ def student_list_view(request):
     student = Student.objects.all()
     serializer = StudentSerializer(student, many=True)
     return Response({'data': serializer.data}, status=status.HTTP_200_OK)
-
-
 # END HR...
-@swagger_auto_schema(
-    method='get',
-    operation_summary="Admin uchun Leadlar ro'yxati",
-    responses={
-        200: openapi.Response("Leadlar ro'yxati", LeadSerializer(many=True)),
-        400: "Not authenticated"
-    },
-    tags=["Lead"]
-)
-@api_view(['GET'])
-def admin_lead_view(request):
-    if request.user.role == 4:
-        leads = Lead.objects.filter(admin=request.user)
-    else:
-        leads = Lead.objects.all()
-
-    serializer = LeadSerializer(leads, many=True)
-    return Response(serializer.data)
 
 
 @swagger_auto_schema(
@@ -389,57 +457,6 @@ def create_student(request, lead_id):
 
 
 @swagger_auto_schema(
-    method='get',
-    operation_summary="Adminning studentlar ro'yxati",
-    responses={
-        200: openapi.Response("Studentlar ro'yxati", StudentSerializer(many=True)),
-        400: "Not authenticated",
-        403: "Access denied"
-    },
-    tags=["Student"]
-)
-@api_view(['GET'])
-def my_students_list_view(request):
-    if request.user.role == 4:
-        student = Student.objects.filter(admin=request.user)
-        serializer = StudentSerializer(student, many=True)
-        return Response({'message': 'success'}, serializer.data)
-    return Response({'message': 'You are not Admin'}, status=status.HTTP_403_FORBIDDEN)
-
-# @swagger_auto_schema(
-#     method='post',
-#     operation_summary="Yangi student yaratish",
-#     request_body=StudentSerializer,
-#     responses={
-#         201: openapi.Response("Yaratilgan student ma'lumotlari", StudentSerializer()),
-#         400: "Not authenticated or validation error",
-#         403: "Access denied",
-#         404: "Lead not found"
-#     },
-#     tags=["Student"]
-# )
-# @api_view(['POST'])
-# def create_student(request):
-#     lead_id = request.data.get("lead")
-#     if not lead_id:
-#         return Response({'message': 'Lead id not found'}, status=400)
-#
-#     lead = Lead.objects.filter(id=lead_id).first()
-#     if not lead:
-#         return Response({'message': 'Lead not found'}, status=404)
-#
-#     if request.user.role == 4 and lead.admin != request.user:
-#         return Response({'message': 'this lead not for you'}, status=403)
-#
-#     serializer = StudentSerializer(data=request.data)
-#     if serializer.is_valid():
-#         serializer.save(created_by=request.user, admin=request.user)
-#         return Response(serializer.data, status=201)
-#     return Response(serializer.errors, status=400)
-
-
-
-@swagger_auto_schema(
     method='patch',
     operation_summary="Student ma'lumotlarini yangilash",
     manual_parameters=[
@@ -462,9 +479,6 @@ def student_update_view(request, pk):
     student = Student.objects.filter(id=pk).first()
     if not student:
         return Response({'message': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
-
-    if user.role != 4:
-        return Response({'message': 'You are not Admin'}, status=status.HTTP_403_FORBIDDEN) #????
 
     if not student.admin == user:
         return Response({'message': 'You can not update this student'}, status=status.HTTP_403_FORBIDDEN)
@@ -491,12 +505,12 @@ def student_update_view(request, pk):
     tags=["Student"]
 )
 @api_view(['GET'])
-def student_detail(request, id):
-    student = Student.objects.filter(id=id).first()
+def student_detail(request, pk):
+    student = Student.objects.filter(id=pk).first()
     if not student:
         return Response({'message': 'Student not found'}, status=404)
 
-    if request.user.role == 4 and student.lead.admin != request.user:
+    if request.user.role == 4 and student.admin != request.user:
         return Response({'message': 'this student not for you'}, status=403)
 
     serializer = StudentSerializer(student)
@@ -505,9 +519,9 @@ def student_detail(request, id):
 @swagger_auto_schema(
     method='post',
     operation_summary="Leadga comment qoshish",
-    request_body=LeadSerializer,
+    request_body=CommentSerializer,
     responses={
-        200: openapi.Response("Comment qo'shildi", LeadSerializer()),
+        200: openapi.Response("Comment qo'shildi", CommentSerializer),
         400: "Not authenticated or validation error",
         403: "Access denied",
         404: "Lead not found"
@@ -521,7 +535,7 @@ def add_comment_view(request, pk):
     if not lead:
         return Response({'message': 'Lead not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    if request.user.role == 4:
+    if request.user.role != 4:
         return Response({'message': 'this lead not for you'}, status=status.HTTP_403_FORBIDDEN)
     
     serializer = CommentSerializer(data=request.data)
