@@ -4,14 +4,16 @@ from .views import payment_list, create_payment, update_payment, balance_report,
     student_list_view, lead_update_view, create_student_view, \
     student_update_view, student_detail, create_student, update_payment_admin,  add_comment_view ,\
     student_list_view, lead_update_view, create_student_view, \
-    student_update_view, student_detail, update_payment_admin
+    student_update_view, student_detail, update_payment_admin, change_leads_admin_view, change_students_admin_view
 
 
 urlpatterns = [
     path('create_lead/', create_lead_view, name='create-lead'),
     path('create_student/', create_student_view, name='create-student'),
     path('change_lead_admin/<int:lead_id>/', change_lead_admin_view, name='change-lead-admin'),
+    path('change_leads_admin/', change_leads_admin_view, name='change-leads-admin'),
     path('change_student_admin/<int:student_id>/', change_student_admin_view, name='change-student-admin'),
+    path("chang_students_admin/", change_students_admin_view, name="change-students-admin"),
     path('lead_list/', lead_list_view, name='lead-list'),
     path('student_list/', student_list_view, name='student-list'),
     # path('admin_lead_list/<int:pk>/', admin_lead_view, name='admin-lead-list'),
