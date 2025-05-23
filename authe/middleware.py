@@ -3,14 +3,14 @@ import jwt
 from django.conf import settings
 from .models import User
 
-ROLE_ACCESS = {
-    1: "*",
-    2: ['create_lead/', 'create_user/', 'create_student/', 'change_lead_admin/', 'change_student_admin/',
-    'lead_list/', 'student_list/', 'lead_update/', 'student_update/', 'student_detail/', 'me/'],
-    3: ['payment_list/', 'create_payment/', 'update_payment/', 'balance_report/', 'me/'],
-    4: ['create_lead/', 'admin_lead_list/', 'lead_update/', 'admin_create_student/',
-        'student_detail/', 'student_list/', 'student/', 'payment_list/', 'add_comment/', 'create_payment/', 'me/'],
-}
+# ROLE_ACCESS = {
+#     1: "*",
+#     2: ['create_lead/', 'create_user/', 'create_student/', 'change_lead_admin/', 'change_student_admin/',
+#     'lead_list/', 'student_list/', 'lead_update/', 'student_update/', 'student_detail/', 'me/'],
+#     3: ['payment_list/', 'create_payment/', 'update_payment/', 'balance_report/', 'me/'],
+#     4: ['create_lead/', 'admin_lead_list/', 'lead_update/', 'admin_create_student/',
+#         'student_detail/', 'student_list/', 'student/', 'payment_list/', 'add_comment/', 'create_payment/', 'me/'],
+# }
 
 class RoleCheckMiddleware:
     def __init__(self, get_response):
@@ -38,14 +38,14 @@ class RoleCheckMiddleware:
             except User.DoesNotExist:
                 return JsonResponse({"detail": "User not found"}, status=404)
 
-            request.user_role = role
+            # request.user_role = role
+            #
+            # allowed_roles = ROLE_ACCESS.get(role, [])
+            # if allowed_roles == "*":
+            #     return self.get_response(request)
 
-            allowed_roles = ROLE_ACCESS.get(role, [])
-            if allowed_roles == "*":
-                return self.get_response(request)
-
-            if not any(path.startswith(p) for p in allowed_roles):
-                return JsonResponse({"detail": "You do not have permission to access this resource."}, status=403)
+            # if not any(path.startswith(p) for p in allowed_roles):
+            #     return JsonResponse({"detail": "You do not have permission to access this resource."}, status=403)
 
         except jwt.ExpiredSignatureError:
             return JsonResponse({"detail": "Access token expired, use refresh token to get a new access token."}, status=401)

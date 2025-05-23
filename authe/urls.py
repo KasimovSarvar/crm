@@ -4,7 +4,7 @@ from config.urls import schema_view
 
 urlpatterns = [
     path('create_user/', create_user_view),
-    path('login/', login_view),
+    path('login/', login_view,name='login'),
     path('me/', me_view)
 ]
 

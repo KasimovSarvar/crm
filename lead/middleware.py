@@ -2,18 +2,56 @@ from django.shortcuts import redirect
 from django.utils.deprecation import MiddlewareMixin
 from  django.http import JsonResponse
 from django.urls import reverse
-from lead.views import create_student
+from authe.views import me_view
+from lead.views import payment_list, create_payment, update_payment, balance_report, create_lead_view, \
+    change_lead_admin_view, change_student_admin_view, lead_list_view, \
+    student_list_view, lead_update_view, create_student_view, \
+    student_update_view, student_detail, create_student, update_payment_admin,  add_comment_view ,\
+    student_list_view, lead_update_view, create_student_view, \
+    student_update_view, student_detail, update_payment_admin, change_leads_admin_view, change_students_admin_view
 
+
+# reverse("change-lead-admin",kwargs=view_kwargs),reverse("lead-update"),reverse("change-student-admin"),reverse("student-update"),reverse("student-detail"),reverse("update-payment"),reverse("update-payment-admin"),reverse("add-comment")]
 
 class BasicMiddleware(MiddlewareMixin):
     def process_view(self, request,view_func,view_args,view_kwargs):
-        target_url = [reverse("create-student"),reverse('student-list')]
-        if request.path in target_url:
-            if request.user.role == 4:
-                return redirect(reverse("create_student"),reverse('create_lead'),reverse('admin_create_student'),reverse('admin_lead_list'),reverse('lead_update'),reverse('admin_create_student'),reverse('student_detail'),reverse('update_payment_admin'),reverse('payment_list'),reverse('create_payment'),reverse('me'))( request, *view_args, **view_kwargs)
-            elif request.user.role == 2:
-                return redirect(reverse("create_lead"),reverse("create_user"),reverse("create_student"),reverse("change_lead_admin"),reverse("change_student_admin"),reverse("change_payment_admin"),reverse("lead_list"),reverse("student_list"),reverse("lead_update"),reverse("student_update"),reverse("me"),reverse("student_detail"))( request, *view_args, **view_kwargs)
-            elif request.user.role == 3:
-                return redirect(reverse("payment_list"),reverse("create_payment"),reverse('update_payment'),reverse('balance_report'),reverse('me'))( request, *view_args, **view_kwargs)
+        if request.path == reverse("create-lead"):
+            if request.user.role in  [1,2,4]:
+                return create_lead_view(request,*view_args, **view_kwargs)
+
+        if request.path == reverse("change-leads-admin"):
+            if request.user.role  in [1,2]:
+                return change_leads_admin_view(request,*view_args, **view_kwargs)
+
+        if request.path == reverse("lead-list"):
+            if request.user.role in [1,2]:
+                return lead_list_view(request,*view_args, **view_kwargs)
+        if request.path == reverse("create-student"):
+            if request.user.role in [1,2]:
+                return create_student_view(request,*view_args, **view_kwargs)
+
+        if request.path == reverse("change-students-admin"):
+            if request.user.role in [1,2]:
+                return change_students_admin_view(request,*view_args, **view_kwargs)
+
+        if request.path == reverse("student-list"):
+            if request.user.role  in [1,2,4]:
+                return student_list_view(request,*view_args, **view_kwargs)
+
+        if request.path == reverse("payment-list"):
+            if request.user.role in [1,3,4]:
+                return payment_list(request,*view_args, **view_kwargs)
+
+        if request.path == reverse("create-payment"):
+            if request.user.role in [1,3,4]:
+                return create_payment(request,*view_args, **view_kwargs)
+
+        if request.path == reverse("balance-report"):
+            if request.user.role in [1,3]:
+                return balance_report(request,*view_args, **view_kwargs)
+            return JsonResponse(data={"hone":"mumkinmas"})
+
+
+
 
         return None
