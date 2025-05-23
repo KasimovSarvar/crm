@@ -196,37 +196,37 @@ def create_student_view(request):
     return Response({"message": "student created successfully"}, status=status.HTTP_201_CREATED)
 
 
-@swagger_auto_schema(
-    method='put',
-    operation_summary="HR yoki SuperUser leadni adminini ozgartirishi",
-    request_body=openapi.Schema(type=openapi.TYPE_OBJECT, properties={
-        'admin_id': openapi.Schema(type=openapi.TYPE_INTEGER)
-    }),
-    responses={
-        200: "Leadi admini ozgratirildi",
-        400: "admin_id yoki notogri",
-        403: "Permission denied",
-        404: "Lead yoki admin topilmadi"
-    },
-    tags=["Lead"]
-)
-@api_view(['PUT'])
-def change_lead_admin_view(request, lead_id):
-    lead = Lead.objects.filter(id=lead_id).first()
-    if not lead:
-        return Response({'message': 'Lead topilmadi'}, status=status.HTTP_404_NOT_FOUND)
-
-    new_admin_id = request.data["admin_id"]
-    if not new_admin_id:
-        return Response({'message': 'admin_id yuborilish shart'}, status=status.HTTP_400_BAD_REQUEST)
-
-    new_admin = User.objects.filter(id=new_admin_id, role=4).first()
-    if not new_admin:
-        return Response({'message': 'Bunday admin mavjud emas'}, status=status.HTTP_404_NOT_FOUND)
-
-    lead.admin = new_admin
-    lead.save()
-    return Response({'message': 'Lead admin yangilandi'}, status=status.HTTP_200_OK)
+# @swagger_auto_schema(
+#     method='put',
+#     operation_summary="HR yoki SuperUser leadni adminini ozgartirishi",
+#     request_body=openapi.Schema(type=openapi.TYPE_OBJECT, properties={
+#         'admin_id': openapi.Schema(type=openapi.TYPE_INTEGER)
+#     }),
+#     responses={
+#         200: "Leadi admini ozgratirildi",
+#         400: "admin_id yoki notogri",
+#         403: "Permission denied",
+#         404: "Lead yoki admin topilmadi"
+#     },
+#     tags=["Lead"]
+# )
+# @api_view(['PUT'])
+# def change_lead_admin_view(request, lead_id):
+#     lead = Lead.objects.filter(id=lead_id).first()
+#     if not lead:
+#         return Response({'message': 'Lead topilmadi'}, status=status.HTTP_404_NOT_FOUND)
+#
+#     new_admin_id = request.data["admin_id"]
+#     if not new_admin_id:
+#         return Response({'message': 'admin_id yuborilish shart'}, status=status.HTTP_400_BAD_REQUEST)
+#
+#     new_admin = User.objects.filter(id=new_admin_id, role=4).first()
+#     if not new_admin:
+#         return Response({'message': 'Bunday admin mavjud emas'}, status=status.HTTP_404_NOT_FOUND)
+#
+#     lead.admin = new_admin
+#     lead.save()
+#     return Response({'message': 'Lead admin yangilandi'}, status=status.HTTP_200_OK)
 
 
 @swagger_auto_schema(
@@ -272,37 +272,37 @@ def change_leads_admin_view(request):
 
 
 
-@swagger_auto_schema(
-    method='put',
-    operation_summary="HR yoki SuperAdmin student admin ozgartirishi",
-    request_body=openapi.Schema(type=openapi.TYPE_OBJECT, properties={
-        'admin_id': openapi.Schema(type=openapi.TYPE_INTEGER)
-    }),
-    responses={
-        200: "Student admin ozgraildi",
-        400: "admin_id shart yoki notogri",
-        403: "Permission denied",
-        404: "Student yoki admin topilmadi"
-    },
-    tags=["Student"]
-)
-@api_view(['PUT'])
-def change_student_admin_view(request, student_id):
-    student = Student.objects.filter(id=student_id).first()
-    if not student:
-        return Response({'message': 'Lead topilmadi'}, status=status.HTTP_404_NOT_FOUND)
-
-    new_admin_id = request.data["admin_id"]
-    if not new_admin_id:
-        return Response({'message': 'admin_id yuborilish shart'}, status=status.HTTP_400_BAD_REQUEST)
-
-    new_admin = User.objects.filter(id=new_admin_id, role=4).first()
-    if not new_admin:
-        return Response({'message': 'Bunday admin mavjud emas'}, status=404)
-
-    student.admin = new_admin
-    student.save()
-    return Response({'message': 'Student admin yangilandi'}, status=status.HTTP_200_OK)
+# @swagger_auto_schema(
+#     method='put',
+#     operation_summary="HR yoki SuperAdmin student admin ozgartirishi",
+#     request_body=openapi.Schema(type=openapi.TYPE_OBJECT, properties={
+#         'admin_id': openapi.Schema(type=openapi.TYPE_INTEGER)
+#     }),
+#     responses={
+#         200: "Student admin ozgraildi",
+#         400: "admin_id shart yoki notogri",
+#         403: "Permission denied",
+#         404: "Student yoki admin topilmadi"
+#     },
+#     tags=["Student"]
+# )
+# @api_view(['PUT'])
+# def change_student_admin_view(request, student_id):
+#     student = Student.objects.filter(id=student_id).first()
+#     if not student:
+#         return Response({'message': 'Lead topilmadi'}, status=status.HTTP_404_NOT_FOUND)
+#
+#     new_admin_id = request.data["admin_id"]
+#     if not new_admin_id:
+#         return Response({'message': 'admin_id yuborilish shart'}, status=status.HTTP_400_BAD_REQUEST)
+#
+#     new_admin = User.objects.filter(id=new_admin_id, role=4).first()
+#     if not new_admin:
+#         return Response({'message': 'Bunday admin mavjud emas'}, status=404)
+#
+#     student.admin = new_admin
+#     student.save()
+#     return Response({'message': 'Student admin yangilandi'}, status=status.HTTP_200_OK)
 
 
 @swagger_auto_schema(
