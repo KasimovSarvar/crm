@@ -189,8 +189,8 @@ def create_student_view(request):
     serializer = StudentSerializer(data=request.data)
     if not serializer.is_valid():
         return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
-    if request.user.role == 4:
-        student = serializer.save(created_by=request.user, admin=request.user)
+    # if request.user.role == 4:
+    #     student = serializer.save(created_by=request.user, admin=request.user)
     if request.user.role in [1, 2]:
         student = serializer.save(created_by=request.user, admin=None)
     return Response({"message": "student created successfully"}, status=status.HTTP_201_CREATED)
@@ -451,7 +451,7 @@ def create_student(request, lead_id):
 
     serializer = StudentSerializer(data=request.data)
     if serializer.is_valid():
-        serializer.save()
+        serializer.save(created_by=request.user, admin=request.user)
         return Response(serializer.data, status=201)
     return Response(serializer.errors, status=400)
 
