@@ -46,7 +46,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
   
     'authe.middleware.RoleCheckMiddleware',
-    "lead.middleware.BasicMiddleware"
+    "authe.middleware.BasicMiddleware"
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -164,3 +164,5 @@ JAZZMIN_SETTINGS = {
     "copyright": "MyCRM",
 }
 
+INSTALLED_APPS += ['querycount']
+MIDDLEWARE += ['querycount.middleware.QueryCountMiddleware']
