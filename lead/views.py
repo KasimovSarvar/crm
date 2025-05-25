@@ -20,14 +20,25 @@ from drf_yasg import openapi
     tags=["Payment"]
 )
 @api_view(['GET'])
-def payment_list(request):
+def payment_list_admin(request):
     if request.user.role == 4:
         payment = Payment.objects.filter(student__admin=request.user)
         serializer = PaymentSerializer(payment, many=True)
         return Response(serializer.data)
-    payments = Payment.objects.all()
-    serializer = PaymentSerializer(payments, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response({'error': 'You are not allowed to payments'})
+
+@swagger_auto_schema(
+    method='get',
+    responses={200: PaymentSerializer(many=True)},
+    tags=["Payment"]
+)
+@api_view(['GET'])
+def payment_list_hr(request):
+    if request.user.role in [1, 2]:
+        payment = Payment.objects.all()
+        serializer = PaymentSerializer(payment, many=True)
+        return Response(serializer.data)
+    return Response({'error': 'You are not allowed to payments'})
 
 
 @swagger_auto_schema(
@@ -189,8 +200,6 @@ def create_student_view(request):
     serializer = StudentSerializer(data=request.data)
     if not serializer.is_valid():
         return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
-    # if request.user.role == 4:
-    #     student = serializer.save(created_by=request.user, admin=request.user)
     if request.user.role in [1, 2]:
         student = serializer.save(created_by=request.user, admin=None)
     return Response({"message": "student created successfully"}, status=status.HTTP_201_CREATED)
@@ -391,9 +400,9 @@ def student_list_view(request):
 @swagger_auto_schema(
     method='put',
     operation_summary="Lead ma'lumotlarini yangilash",
-    manual_parameters=[
-        openapi.Parameter('lead_id', openapi.IN_PATH, description="Lead ID", type=openapi.TYPE_INTEGER)
-    ],
+    # manual_parameters=[
+    #     openapi.Parameter('lead_id', openapi.IN_PATH, description="Lead ID", type=openapi.TYPE_INTEGER)
+    # ],
     request_body=LeadSerializer,
     responses={
         200: openapi.Response("Yangilangan lead ma'lumotlari", LeadSerializer()),
@@ -543,4 +552,3 @@ def add_comment_view(request, pk):
         serializer.save(admin=request.user, lead=lead)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-     
