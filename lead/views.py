@@ -207,16 +207,30 @@ def create_lead_view_admin(request):
     responses={
         201: openapi.Response(description="Student qoshildi", schema=StudentSerializer),
         400: "Invalid credentials",
-        403: "Permission denied"
+        403: "Permission denied",
+        404: "Lead not found"
     },
     tags=["Student"]
 )
 @api_view(['POST'])
-def create_student_view_hr(request):
-    serializer = StudentSerializer(data=request.data)
+def create_student_view_hr(request, lead_id):
+    lead = Lead.objects.filter(id=lead_id).first()
+    if not lead:
+        return Response({'message': 'Lead not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    data = request.data.copy()
+    data["first_name"] = lead.first_name
+    data["last_name"] = lead.last_name
+    data["phone_number"] = lead.phone_number
+    data['passport_series'] = lead.passport_series
+    
+    serializer = StudentSerializer(data=data)
     if not serializer.is_valid():
-        return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': 'Invalid credentials', 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    
     student = serializer.save(created_by=request.user, admin=None)
+    lead.status = 'closed'
+    lead.save()
     return Response({"message": f"{student} created successfully"}, status=status.HTTP_201_CREATED)
 
 @swagger_auto_schema(
@@ -226,16 +240,33 @@ def create_student_view_hr(request):
     responses={
         201: openapi.Response(description="Student qoshildi", schema=StudentSerializer),
         400: "Invalid credentials",
-        403: "Permission denied"
+        403: "Permission denied",
+        404: "Lead not found"
     },
     tags=["Student"]
 )
 @api_view(['POST'])
-def create_student_view_admin(request):
-    serializer = StudentSerializer(data=request.data)
+def create_student_view_admin(request, lead_id):
+    lead = Lead.objects.filter(id=lead_id).first()
+    if not lead:
+        return Response({'message': 'Lead not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if lead.admin != request.user:
+        return Response({'message': 'This lead is not assigned to you'}, status=status.HTTP_403_FORBIDDEN)
+    
+    data = request.data.copy()
+    data["first_name"] = lead.first_name
+    data["last_name"] = lead.last_name
+    data["phone_number"] = lead.phone_number
+    data['passport_series'] = lead.passport_series
+
+    serializer = StudentSerializer(data=data)
     if not serializer.is_valid():
         return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+    
     student = serializer.save(created_by=request.user, admin=request.user)
+    lead.status = 'closed'
+    lead.save()
     return Response({"message": f"{student} created successfully"}, status=status.HTTP_201_CREATED)
 
 
@@ -608,3 +639,27 @@ def add_comment_view(request, pk):
         serializer.save(admin=request.user, lead=lead)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@swagger_auto_schema(
+    method='get',
+    operation_summary="Studentning batafsil ma'lumotini olish",
+    manual_parameters=[
+        openapi.Parameter('id', openapi.IN_PATH, description="Student ID", type=openapi.TYPE_INTEGER)
+    ],
+    responses={
+        200: openapi.Response("Student ma'lumotlari", StudentSerializer()),
+        400: "Not authenticated",
+        403: "Access denied",
+        404: "Student not found"
+    },
+    tags=["Student"]
+)
+
+@api_view(['GET'])
+def student_detail_view(request, pk):
+    student = Student.objects.filter(id=pk).first()
+    if not student:
+        return Response({'message': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = StudentSerializer(student)
+    return Response(serializer.data)
