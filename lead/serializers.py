@@ -72,4 +72,5 @@ class LeadSerializer(ModelSerializer):
 class LeadCreateSerializer(ModelSerializer):
     class Meta:
         model = Lead
-        fields = ('id', 'first_name', 'last_name', 'phone_number')
+        fields = ('id', 'first_name', 'last_name', 'phone_number', 'created_by', 'type', 'passport_series')
+        read_only_fields = ['created_by', 'id']

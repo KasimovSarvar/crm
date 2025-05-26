@@ -167,20 +167,36 @@ def balance_report(request):
     request_body=LeadCreateSerializer,
     responses={
         201: openapi.Response(description="Lead qoshildi", schema=LeadCreateSerializer),
-        400: "Invalid credentials",
-        403: "Permission denied"
+        400: "Invalid credentials"
     },
     tags=["Lead"]
 )
 @api_view(['POST'])
-def create_lead_view(request):
+def create_lead_view_hr(request):
     serializer = LeadCreateSerializer(data=request.data)
     if not serializer.is_valid():
         return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
-    if request.user.role == 4:
-        serializer.save(created_by=request.user, admin=request.user)
-    if request.user.role in [1, 2]:
-        serializer.save(created_by=request.user, admin=None)
+    serializer.save(created_by=request.user, admin=None)
+    return Response({"message": "lead created successfully"}, status=status.HTTP_201_CREATED)
+
+
+
+@swagger_auto_schema(
+    method='post',
+    operation_summary="Admin lead yaratishi",
+    request_body=LeadCreateSerializer,
+    responses={
+        201: openapi.Response(description="Lead qoshildi", schema=LeadCreateSerializer),
+        400: "Invalid credentials"
+    },
+    tags=["Lead"]
+)
+@api_view(['POST'])
+def create_lead_view_admin(request):
+    serializer = LeadCreateSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+    serializer.save(created_by=request.user, admin=request.user)
     return Response({"message": "lead created successfully"}, status=status.HTTP_201_CREATED)
 
 
@@ -196,13 +212,31 @@ def create_lead_view(request):
     tags=["Student"]
 )
 @api_view(['POST'])
-def create_student_view(request):
+def create_student_view_hr(request):
     serializer = StudentSerializer(data=request.data)
     if not serializer.is_valid():
         return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
-    if request.user.role in [1, 2]:
-        student = serializer.save(created_by=request.user, admin=None)
-    return Response({"message": "student created successfully"}, status=status.HTTP_201_CREATED)
+    student = serializer.save(created_by=request.user, admin=None)
+    return Response({"message": f"{student} created successfully"}, status=status.HTTP_201_CREATED)
+
+@swagger_auto_schema(
+    method='post',
+    operation_summary="Admin student yaratishi",
+    request_body=StudentSerializer,
+    responses={
+        201: openapi.Response(description="Student qoshildi", schema=StudentSerializer),
+        400: "Invalid credentials",
+        403: "Permission denied"
+    },
+    tags=["Student"]
+)
+@api_view(['POST'])
+def create_student_view_admin(request):
+    serializer = StudentSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+    student = serializer.save(created_by=request.user, admin=request.user)
+    return Response({"message": f"{student} created successfully"}, status=status.HTTP_201_CREATED)
 
 
 # @swagger_auto_schema(
@@ -356,7 +390,7 @@ def change_students_admin_view(request):
 
 @swagger_auto_schema(
     method='get',
-    operation_summary="HR hamma admin esa ozi yaratgan leadlarini korishi",
+    operation_summary="Admin ozi yaratgan leadlarini korishi",
     responses={
         200: openapi.Response(description="Leadlari", schema=LeadSerializer(many=True)),
         403: "Permission denied"
@@ -364,20 +398,32 @@ def change_students_admin_view(request):
     tags=["Lead"]
 )
 @api_view(['GET'])
-def lead_list_view(request):
-    if request.user.role == 4:
-        leads = Lead.objects.filter(admin=request.user)
-        serializer = LeadSerializer(leads, many=True)
-        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
-
-    leads = Lead.objects.all()
+def lead_list_view_admin(request):
+    leads = Lead.objects.filter(admin=request.user)
     serializer = LeadSerializer(leads, many=True)
-    return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+    return Response({'your_leads': serializer.data}, status=status.HTTP_200_OK)
+
 
 
 @swagger_auto_schema(
     method='get',
-    operation_summary="HR ozi yaratgan studentlarini korishi",
+    operation_summary="Hr hamma eadlani korishi",
+    responses={
+        200: openapi.Response(description="Leadlar", schema=LeadSerializer(many=True)),
+        403: "Permission denied"
+    },
+    tags=["Lead"]
+)
+@api_view(['GET'])
+def lead_list_view_hr(request):
+    leads = Lead.objects.all()
+    serializer = LeadSerializer(leads, many=True)
+    return Response({'leads': serializer.data}, status=status.HTTP_200_OK)
+
+
+@swagger_auto_schema(
+    method='get',
+    operation_summary="Admin ozi yaratgan studentlarini korishi",
     responses={
         200: openapi.Response(description="Studentlari", schema=StudentSerializer(many=True)),
         403: "Permission denied"
@@ -385,15 +431,25 @@ def lead_list_view(request):
     tags=["Student"]
 )
 @api_view(['GET'])
-def student_list_view(request):
-    if request.user.role == 4:
-        students = Student.objects.filter(admin=request.user)
-        serializer = StudentSerializer(students, many=True)
-        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+def student_list_view_admin(request):
+    students = Student.objects.filter(admin=request.user)
+    serializer = StudentSerializer(students, many=True)
+    return Response({'your students': serializer.data}, status=status.HTTP_200_OK)
 
+@swagger_auto_schema(
+    method='get',
+    operation_summary="Hr hamma studentlarni korishi",
+    responses={
+        200: openapi.Response(description="Studentlar", schema=StudentSerializer(many=True)),
+        403: "Permission denied"
+    },
+    tags=["Student"]
+)
+@api_view(['GET'])
+def student_list_view_hr(request):
     student = Student.objects.all()
     serializer = StudentSerializer(student, many=True)
-    return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+    return Response({'students': serializer.data}, status=status.HTTP_200_OK)
 # END HR...
 
 

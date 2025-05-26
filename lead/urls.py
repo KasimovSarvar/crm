@@ -1,18 +1,22 @@
 from django.urls import path
-from .views import payment_list_admin, create_payment, update_payment, balance_report, create_lead_view, lead_list_view, \
-    student_list_view, lead_update_view, create_student_view, \
+from .views import payment_list_admin, create_payment, update_payment, balance_report, create_lead_view_admin, create_lead_view_hr, lead_list_view_admin, lead_list_view_hr, \
+    student_list_view_admin, lead_update_view, create_student_view_hr, \
     student_detail, create_student, update_payment_admin, add_comment_view, \
-    student_list_view, lead_update_view, create_student_view, \
+    student_list_view_hr, lead_update_view, create_student_view_admin, \
     student_update_view, student_detail, update_payment_admin, change_leads_admin_view, change_students_admin_view, \
     payment_list_hr
 
 urlpatterns = [
-    path('create_lead/', create_lead_view, name='create-lead'),
-    path('create_student/', create_student_view, name='create-student'),
+    path('create_lead-admin/', create_lead_view_admin, name='create-lead-admin'),
+    path('create_lead-hr/', create_lead_view_hr, name='create-lead-hr'),
+    path('create_student-admin/', create_student_view_admin, name='create-student-admin'),
+    path('create_student-hr/', create_student_view_hr, name='create-student-hr'),
     path('change_lead_admin/', change_leads_admin_view, name='change-leads-admin'),
     path("change_student_admin/", change_students_admin_view, name="change-students-admin"),
-    path('lead_list/', lead_list_view, name='lead-list'),
-    path('student_list/', student_list_view, name='student-list'),
+    path('lead_list-admin/', lead_list_view_admin, name='lead-list-admin'),
+    path('lead_list-hr/', lead_list_view_hr, name='lead-list-hr'),
+    path('student_list-admin/', student_list_view_admin, name='student-list-admin'),
+    path('student_list-hr/', student_list_view_hr, name='student-list-hr'),
     path('lead_update/<int:pk>/', lead_update_view, name='lead-update'),
     path('student_update/<int:pk>/', student_update_view, name='student-update'),
     path('student_detail/<int:pk>/', student_detail, name='student-detail'),
