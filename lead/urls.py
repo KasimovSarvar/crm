@@ -4,7 +4,7 @@ from .views import payment_list, create_payment, update_payment, balance_report,
     student_list_view, admin_lead_view, lead_update_view, create_student_view, my_students_list_view, \
     student_update_view, student_detail, create_student, update_payment_admin,  add_comment_view,\
     student_list_view, admin_lead_view, lead_update_view, create_student_view, \
-    student_update_view, student_detail, update_payment_admin
+    student_update_view, student_detail, update_payment_admin, hr_lead_list_view, hr_student_list_view, hr_create_lead_view, hr_create_student_view
 
 
 urlpatterns = [
@@ -25,4 +25,8 @@ urlpatterns = [
     path('update_payment_admin/<int:pk>/', update_payment_admin, name='update-payment'),
     path('balance_report/', balance_report, name='balance-report'),
     path('add_comment/<int:lead_id>/', add_comment_view, name='add-comment'),
+    path('hr_lead_list/', hr_lead_list_view, name='hr-lead-list'),
+    path('hr_student_list/', hr_student_list_view, name='hr-student-list'),
+    path('hr_create_lead/', hr_create_lead_view, name='hr-create-lead'),
+    path('hr_create_student/<int:lead_id>/', hr_create_student_view, name='hr-create-student'),
 ]

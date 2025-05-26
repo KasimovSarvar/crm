@@ -479,4 +479,99 @@ def add_comment_view(request, pk):
         serializer.save(admin=request.user, lead=lead)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
      
+@swagger_auto_schema(
+    method='get',
+    operation_summary="HR or SuperUser get leads list",
+    responses={
+        200: openapi.Response("Leads list", LeadSerializer(many=True)),
+        403: "Permission denied"
+    },
+    tags=["Lead"]
+)    
+@api_view(['GET'])
+def hr_lead_list_view(request):
+    if request.user.role in [1, 2]:
+        leads = Lead.objects.all()
+        serializer = LeadSerializer(leads, many=True)
+        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+    return Response({'message': 'You are not allowed to view leads'}, status=status.HTTP_403_FORBIDDEN)
+
+@swagger_auto_schema(
+    method='get',
+    operation_summary="HR or SuperUser get students list",
+    responses={
+        200: openapi.Response("Students list", StudentSerializer(many=True)),
+        403: "Permission denied"
+    },
+    tags=["Student"]
+)
+@api_view(['GET'])
+def hr_student_list_view(request):
+    if request.user.role in [1, 2]:
+        students = Student.objects.all()
+        serializer = StudentSerializer(students, many=True)
+        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+    return Response({'message': 'You are not allowed to view students'}, status=status.HTTP_403_FORBIDDEN)
+
+@swagger_auto_schema(
+    method='post',
+    operation_summary="HR or SuperUser create lead",
+    request_body=LeadCreateSerializer,
+    responses={
+        201: openapi.Response("Lead created successfully", LeadCreateSerializer()),
+        400: "Invalid credentials",
+        403: "Permission denied"
+    },
+    tags=["Lead"]
+)
+@api_view(['POST'])
+def hr_create_lead_view(request):
+    data = request.data
+    user = request.user
+    serializer = LeadCreateSerializer(data=data)
+    if user.role in [1, 2]:
+        if serializer.is_valid():
+            serializer.save(created_by=user, admin=None)
+            return Response({"message": "Lead created successfully"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response({'message': 'You are not allowed to create leads'}, status=status.HTTP_403_FORBIDDEN)
+
+@swagger_auto_schema(
+    method='post',
+    operation_summary="HR or SuperUser create student from lead",
+    request_body=StudentSerializer,
+    responses={
+        201: openapi.Response("Student created successfully", StudentSerializer()),
+        400: "Invalid credentials",
+        403: "Permission denied",
+        404: "Lead not found"
+    },
+    tags=["Student"]
+)
+    
+@api_view(['POST'])
+def hr_create_student_view(request, lead_id):
+    data = request.data
+    user = request.user
+    if user.role in [1, 2]:
+        return Response({'message': 'You are not allowed to create students'}, status=status.HTTP_403_FORBIDDEN)
+    
+    lead = Lead.objects.filter(id=lead_id).first()
+    if not lead:
+        return Response({'message': 'Lead not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    lead_data = {
+        'first_name': lead.first_name,
+        'last_name': lead.last_name,
+        'passport_series': lead.passport_series,
+        'phone_number': lead.phone_number,
+        'admin': user
+    }
+    
+    serializer = StudentSerializer(data={**data, **lead_data})
+    if serializer.is_valid():
+        serializer.save(created_by=user, admin=user)
+        return Response({"message": "Student created successfully"}, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
