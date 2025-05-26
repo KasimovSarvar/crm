@@ -55,13 +55,45 @@ class BasicMiddleware(MiddlewareMixin):
         role = getattr(request.user, "role", None)
         pk_id = view_kwargs.get("pk")
 
+        if request.path == reverse("student-detail",kwargs={"pk":pk_id}):
+            if role == 4:
+                return student_detail(request,*view_args, **view_kwargs)
+            return JsonResponse(data={"error":"Student admin incorrect"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+        if request.path == reverse("add-comment",kwargs={"pk":pk_id}):
+            if role in [1,2,3]:
+                return add_comment_view(request, view_func, view_args, view_kwargs)
+            return JsonResponse(data={"error":"Comment can not added"},status=status.HTTP_400_BAD_REQUEST)
+
+
+        if request.path == reverse("update-payment-admin",kwargs={"pk":pk_id}):
+            if role == 4:
+                return update_payment_admin(request, view_func, view_args, view_kwargs)
+            elif role in [1,3]:
+                return update_payment(request, view_func, view_args, view_kwargs)
+            return JsonResponse(data={"error":"Payment cal not updated"},status=status.HTTP_400_BAD_REQUEST)
 
 
 
+        if request.path == reverse("lead-update",kwargs={"pk":pk_id}):
+            if role == 4:
+                return lead_update_view(request,*view_args, **view_kwargs)
+            elif role in [1,2]:
+                return change_leads_admin_view(request,*view_args, **view_kwargs)
+            return JsonResponse({"error": "Lead can not updated"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+        if request.path == reverse("student-update",kwargs={"pk":pk_id}):
+            if role == 4:
+                return student_update_view(request,*view_args, **view_kwargs)
+            elif role in [1,2]:
+                return change_students_admin_view(request,*view_args, **view_kwargs)
+            return JsonResponse(data={"error": "Student can not updated"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
-        if request.path == reverse("create-lead"):
+        if request.path == reverse("create-lead",kwargs={"pk":pk_id}):
             if role == 4:
                 return create_lead_view_admin(request, *view_args, **view_kwargs)
             elif role in [1,2]:
