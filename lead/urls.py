@@ -9,8 +9,8 @@ from .views import payment_list_admin, create_payment, update_payment, balance_r
 urlpatterns = [
     path('create_lead-admin/', create_lead_view_admin, name='create-lead-admin'),
     path('create_lead-hr/', create_lead_view_hr, name='create-lead-hr'),
-    path('create_student-admin/', create_student_view_admin, name='create-student-admin'),
-    path('create_student-hr/', create_student_view_hr, name='create-student-hr'),
+    path('create_student-admin/<int:lead_id>/', create_student_view_admin, name='create-student-admin'),
+    path('create_student-hr/<int:lead_id>/', create_student_view_hr, name='create-student-hr'),
     path('change_lead_admin/', change_leads_admin_view, name='change-leads-admin'),
     path("change_student_admin/", change_students_admin_view, name="change-students-admin"),
     path('lead_list-admin/', lead_list_view_admin, name='lead-list-admin'),
