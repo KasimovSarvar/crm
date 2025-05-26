@@ -609,6 +609,21 @@ def add_comment_view(request, pk):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@swagger_auto_schema(
+    method='get',
+    operation_summary="Studentning batafsil ma'lumotini olish",
+    manual_parameters=[
+        openapi.Parameter('id', openapi.IN_PATH, description="Student ID", type=openapi.TYPE_INTEGER)
+    ],
+    responses={
+        200: openapi.Response("Student ma'lumotlari", StudentSerializer()),
+        400: "Not authenticated",
+        403: "Access denied",
+        404: "Student not found"
+    },
+    tags=["Student"]
+)
+
 @api_view(['GET'])
 def student_detail_view(request, pk):
     student = Student.objects.filter(id=pk).first()
