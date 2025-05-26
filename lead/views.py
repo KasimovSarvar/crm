@@ -608,3 +608,12 @@ def add_comment_view(request, pk):
         serializer.save(admin=request.user, lead=lead)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def student_detail_view(request, pk):
+    student = Student.objects.filter(id=pk).first()
+    if not student:
+        return Response({'message': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = StudentSerializer(student)
+    return Response(serializer.data)
