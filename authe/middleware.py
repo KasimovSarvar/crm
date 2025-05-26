@@ -58,6 +58,7 @@ class BasicMiddleware(MiddlewareMixin):
         if request.path == reverse("student-detail",kwargs={"pk":pk_id}):
             if role == 4:
                 return student_detail(request,*view_args, **view_kwargs)
+            # elif role in [1,2]:
             return JsonResponse(data={"error":"Student admin incorrect"}, status=status.HTTP_400_BAD_REQUEST)
 
 
