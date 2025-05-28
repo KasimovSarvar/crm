@@ -12,6 +12,7 @@ from .serializers import StudentSerializer, PaymentSerializer, LeadSerializer, P
 from .models import Outcome, Lead, Student, Payment
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView, UpdateAPIView
 
 
 @swagger_auto_schema(
@@ -213,8 +214,8 @@ def create_lead_view_admin(request):
     tags=["Student"]
 )
 @api_view(['POST'])
-def create_student_view_hr(request, lead_id):
-    lead = Lead.objects.filter(id=lead_id).first()
+def create_student_view_hr(request, pk):
+    lead = Lead.objects.filter(id=pk).first()
     if not lead:
         return Response({'message': 'Lead not found'}, status=status.HTTP_404_NOT_FOUND)
     
@@ -246,8 +247,8 @@ def create_student_view_hr(request, lead_id):
     tags=["Student"]
 )
 @api_view(['POST'])
-def create_student_view_admin(request, lead_id):
-    lead = Lead.objects.filter(id=lead_id).first()
+def create_student_view_admin(request,pk):
+    lead = Lead.objects.filter(id=pk).first()
     if not lead:
         return Response({'message': 'Lead not found'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -663,3 +664,4 @@ def student_detail_view(request, pk):
 
     serializer = StudentSerializer(student)
     return Response(serializer.data)
+
